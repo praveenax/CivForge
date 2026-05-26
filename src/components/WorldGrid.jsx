@@ -8,6 +8,7 @@ function WorldGrid({
   tiles,
   cities,
   players,
+  locateRequest,
   selectedTileId,
   onSelectTile,
   onSelectCity,
@@ -94,6 +95,35 @@ function WorldGrid({
       behavior: "smooth",
     });
   };
+
+  useEffect(() => {
+    if (!locateRequest) {
+      return;
+    }
+
+    const wrapper = worldWrapperRef.current;
+    if (!wrapper) {
+      return;
+    }
+
+    const worldX = locateRequest.x * TILE_SIZE + TILE_SIZE / 2;
+    const worldY = locateRequest.y * TILE_SIZE + TILE_SIZE / 2;
+
+    const nextScrollLeft = Math.min(
+      Math.max(0, worldX - wrapper.clientWidth / 2),
+      Math.max(0, worldPixelWidth - wrapper.clientWidth),
+    );
+    const nextScrollTop = Math.min(
+      Math.max(0, worldY - wrapper.clientHeight / 2),
+      Math.max(0, worldPixelHeight - wrapper.clientHeight),
+    );
+
+    wrapper.scrollTo({
+      left: nextScrollLeft,
+      top: nextScrollTop,
+      behavior: "smooth",
+    });
+  }, [locateRequest, worldPixelHeight, worldPixelWidth]);
 
   return (
     <section className="world-grid-wrapper">

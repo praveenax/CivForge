@@ -6,7 +6,17 @@ const LIST_TABS = {
   UNITS: "units",
 };
 
-function ListOverlay({ isOpen, cities, tiles, players, onClose }) {
+const getCurrentQueueItem = (city, type) =>
+  (city.queue ?? []).find((entry) => entry.type === type) ?? null;
+
+function ListOverlay({
+  isOpen,
+  cities,
+  tiles,
+  players,
+  onClose,
+  onLocateCity,
+}) {
   const [activeTab, setActiveTab] = useState(LIST_TABS.CITIES);
 
   const playerId = useMemo(
@@ -117,10 +127,22 @@ function ListOverlay({ isOpen, cities, tiles, players, onClose }) {
             playerCities.length > 0 ? (
               <ul className="list-overlay-items">
                 {playerCities.map((city) => (
-                  <li key={city.id}>
-                    <strong>{city.name}</strong> - Owner:{" "}
-                    {playerNameById.get(city.owner) ?? city.owner} - Pop:{" "}
-                    {city.population} - Location: ({city.x}, {city.y})
+                  <li key={city.id} className="list-city-row">
+                    <div>
+                      <strong>{city.name}</strong> - Owner:{" "}
+                      {playerNameById.get(city.owner) ?? city.owner} - Pop:{" "}
+                      {city.population}
+                    </div>
+                    <div>
+                      Building: {getCurrentQueueItem(city, "building")?.id ?? "None"} - Unit: {getCurrentQueueItem(city, "unit")?.id ?? "None"}
+                    </div>
+                    <button
+                      type="button"
+                      className="list-locate-button"
+                      onClick={() => onLocateCity(city)}
+                    >
+                      Locate
+                    </button>
                   </li>
                 ))}
               </ul>

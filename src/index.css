@@ -716,6 +716,24 @@ button:hover {
   gap: 8px;
 }
 
+.list-city-row {
+  display: grid;
+  gap: 6px;
+}
+
+.list-locate-button {
+  justify-self: start;
+  background: var(--action);
+  color: #1f1a10;
+  border-color: rgba(0, 0, 0, 0.24);
+  padding: 6px 10px;
+  font-weight: 700;
+}
+
+.list-locate-button:hover {
+  background: var(--action-hover);
+}
+
 .list-overlay-empty {
   margin: 0;
   color: var(--ink-1);

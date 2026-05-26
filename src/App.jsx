@@ -30,6 +30,7 @@ function App() {
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [isResearchPromptOpen, setIsResearchPromptOpen] = useState(false);
   const [isListOverlayOpen, setIsListOverlayOpen] = useState(false);
+  const [locateRequest, setLocateRequest] = useState(null);
 
   const turn = useGameStore((state) => state.turn);
   const tiles = useGameStore((state) => state.tiles);
@@ -326,6 +327,7 @@ function App() {
           tiles={tiles}
           cities={cities}
           players={players}
+          locateRequest={locateRequest}
           selectedTileId={selectedTileId}
           onSelectTile={selectTile}
           onSelectCity={selectCity}
@@ -366,6 +368,23 @@ function App() {
         tiles={tiles}
         players={players}
         onClose={() => setIsListOverlayOpen(false)}
+        onLocateCity={(city) => {
+          const tile = tiles.find(
+            (entry) => entry.x === city.x && entry.y === city.y,
+          );
+
+          if (tile) {
+            selectTile(tile.id);
+          }
+
+          setLocateRequest({
+            x: city.x,
+            y: city.y,
+            cityId: city.id,
+            requestId: Date.now(),
+          });
+          setIsListOverlayOpen(false);
+        }}
       />
     </div>
   );
