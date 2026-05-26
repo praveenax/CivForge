@@ -533,12 +533,119 @@ button:hover {
 .city-overlay {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
-  max-height: none;
-  overflow: auto;
-  border-radius: 0;
   z-index: 20;
+  background: rgba(6, 10, 14, 0.72);
+  padding: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.city-overlay-panel {
+  width: min(1100px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  border-radius: 16px;
+  z-index: 20;
+}
+
+.city-overlay-header {
+  margin-bottom: 12px;
+}
+
+.city-overlay-subtitle {
+  margin: 4px 0 0;
+  color: var(--ink-1);
+  font-size: 0.92rem;
+}
+
+.city-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.city-kpi-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 4px;
+}
+
+.city-kpi-card span {
+  font-size: 0.8rem;
+  color: var(--ink-1);
+}
+
+.city-kpi-card strong {
+  font-size: 1.1rem;
+}
+
+.city-overlay-columns {
+  margin-bottom: 12px;
+}
+
+.city-info-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.city-progress-group {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.city-progress-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.city-progress-row span {
+  color: var(--ink-1);
+  font-size: 0.9rem;
+}
+
+.city-tag-block {
+  margin-top: 8px;
+}
+
+.city-tag-block span {
+  display: block;
+  color: var(--ink-1);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.city-tag-block p {
+  margin: 0;
+}
+
+.city-yield-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.city-yield-list li {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.city-yield-list span {
+  color: var(--ink-1);
 }
 
 .panel-header {
@@ -565,15 +672,44 @@ button:hover {
 .queue-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 7px;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.queue-item-meta {
+  margin: 2px 0 0;
+  color: var(--ink-1);
+  font-size: 0.82rem;
+}
+
+.queue-item-progress {
+  min-width: 120px;
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+}
+
+.queue-item-progress progress {
+  width: 100%;
 }
 
 .action-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.city-actions-columns {
+  margin-top: 10px;
+}
+
+.city-empty-text {
+  margin: 6px 0 0;
+  color: var(--ink-1);
 }
 
 .tech-overlay {
@@ -754,12 +890,19 @@ button:hover {
 
   .city-overlay {
     inset: 0;
-    width: 100vw;
-    height: 100vh;
+    padding: 10px;
+  }
+
+  .city-overlay-panel {
+    max-height: calc(100vh - 20px);
   }
 
   .overlay-columns {
     grid-template-columns: 1fr;
+  }
+
+  .city-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .minimap-shell {
