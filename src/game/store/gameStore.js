@@ -83,6 +83,26 @@ const normalizeGameSetup = (setup) => {
   };
 };
 
+const inferCivilizationIdFromName = (name) => {
+  const normalizedName = String(name ?? "")
+    .trim()
+    .toLowerCase();
+  const matched = CIVILIZATION_OPTIONS.find(
+    (entry) => entry.name.toLowerCase() === normalizedName,
+  );
+
+  return matched?.id ?? null;
+};
+
+const normalizePlayers = (players = []) =>
+  players.map((player) => ({
+    ...player,
+    civilizationId:
+      player.civilizationId ??
+      inferCivilizationIdFromName(player.name) ??
+      (player.id === PLAYER_ID ? DEFAULT_GAME_SETUP.civilizationId : "greece"),
+  }));
+
 const getAiCivilizations = (playerCivilizationId, opponentCount) => {
   const pool = CIVILIZATION_OPTIONS.filter(
     (entry) => entry.id !== playerCivilizationId,
@@ -98,10 +118,11 @@ const getAiCivilizations = (playerCivilizationId, opponentCount) => {
   });
 };
 
-const createPlayer = ({ id, name, type }) => ({
+const createPlayer = ({ id, name, type, civilizationId }) => ({
   id,
   name,
   type,
+  civilizationId,
   unlockedTechs: ["agriculture"],
   currentResearch: "mining",
   scienceProgress: 0,
@@ -149,12 +170,14 @@ const buildInitialWorldActors = (setup) => {
       id: PLAYER_ID,
       name: playerCiv.name,
       type: "human",
+      civilizationId: playerCiv.id,
     }),
     ...aiCivilizations.map((civ, index) =>
       createPlayer({
         id: `ai_${index + 1}`,
         name: civ.name,
         type: "ai",
+        civilizationId: civ.baseId ?? civ.id,
       }),
     ),
   ];
@@ -290,7 +313,7 @@ export const useGameStore = create((set, get) => {
         isTechTreeOpen: Boolean(snapshot.isTechTreeOpen),
         tiles: snapshot.tiles,
         cities: snapshot.cities,
-        players: snapshot.players,
+        players: normalizePlayers(snapshot.players),
         gameSetup: normalizedSetup,
       });
 

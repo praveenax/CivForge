@@ -265,6 +265,7 @@ function App() {
         <WorldGrid
           tiles={tiles}
           cities={cities}
+          players={players}
           selectedTileId={selectedTileId}
           onSelectTile={selectTile}
           onSelectCity={selectCity}

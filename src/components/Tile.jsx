@@ -7,16 +7,26 @@ const resourceGlyph = {
   manuscripts: "M",
 };
 
-const PLAYER_OWNER_ID = "player1";
+const CIV_CLASS_BY_ID = {
+  rome: "owner-civ-rome",
+  india: "owner-civ-india",
+  egypt: "owner-civ-egypt",
+  greece: "owner-civ-greece",
+  china: "owner-civ-china",
+  persia: "owner-civ-persia",
+  aztec: "owner-civ-aztec",
+};
 
-function Tile({ tile, isSelected, hasCity, onClick }) {
+function Tile({ tile, ownerCivilizationId, isSelected, hasCity, onClick }) {
   const terrain = TERRAIN_TYPES[tile.terrain];
-  const isPlayerOwned = tile.owner === PLAYER_OWNER_ID;
+  const civClassName =
+    CIV_CLASS_BY_ID[ownerCivilizationId ?? ""] ?? "owner-civ-neutral";
   const tileClassName = [
     "tile",
     isSelected ? "selected" : "",
     hasCity ? "city" : "",
-    isPlayerOwned ? "player-owned" : "",
+    tile.owner ? "owned-tile" : "",
+    tile.owner ? civClassName : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -29,9 +39,9 @@ function Tile({ tile, isSelected, hasCity, onClick }) {
       onClick={onClick}
       aria-label={`Tile ${tile.x},${tile.y} ${terrain?.name ?? tile.terrain}`}
     >
-      <span className="tile-coord">
+      {/* <span className="tile-coord">
         {tile.x},{tile.y}
-      </span>
+      </span> */}
       {tile.resource ? (
         <span className="tile-resource">{resourceGlyph[tile.resource]}</span>
       ) : null}

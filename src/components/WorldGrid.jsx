@@ -18,6 +18,7 @@ const WATER_TERRAINS = new Set([
 function WorldGrid({
   tiles,
   cities,
+  players,
   selectedTileId,
   onSelectTile,
   onSelectCity,
@@ -37,6 +38,14 @@ function WorldGrid({
     cities.forEach((city) => map.set(`${city.x}-${city.y}`, city));
     return map;
   }, [cities]);
+
+  const ownerCivilizationLookup = useMemo(() => {
+    const map = new Map();
+    players.forEach((player) => {
+      map.set(player.id, player.civilizationId ?? null);
+    });
+    return map;
+  }, [players]);
 
   const gridWidth = useMemo(
     () => Math.max(...tiles.map((tile) => tile.x)) + 1,
@@ -198,6 +207,9 @@ function WorldGrid({
               <Tile
                 key={tile.id}
                 tile={tile}
+                ownerCivilizationId={
+                  tile.owner ? ownerCivilizationLookup.get(tile.owner) : null
+                }
                 isSelected={selectedTileId === tile.id}
                 hasCity={Boolean(city)}
                 onClick={() => {
