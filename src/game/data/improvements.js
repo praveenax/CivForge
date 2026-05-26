@@ -1,4 +1,17 @@
 export const IMPROVEMENTS = {
+  settlement: {
+    id: "settlement",
+    name: "Settlement",
+    cost: 75,
+    effects: {
+      food: 1,
+      production: 1,
+      culture: 1,
+    },
+    requiredTech: "agriculture",
+    resources: [],
+    requiresTileSelection: true,
+  },
   mine: {
     id: "mine",
     name: "Mine",
@@ -43,4 +56,28 @@ export const getImprovementIdForResource = (resourceId) => {
   );
 
   return matched?.id ?? null;
+};
+
+export const getValidSettlementTiles = (city, tiles = []) => {
+  if (!city) {
+    return [];
+  }
+
+  const culturallyOwnedTiles = tiles.filter((tile) => tile.cityId === city.id);
+
+  if (!culturallyOwnedTiles.length) {
+    return [];
+  }
+
+  return tiles.filter((tile) => {
+    if (tile.owner !== null || tile.cityId !== null || tile.improvement) {
+      return false;
+    }
+
+    return culturallyOwnedTiles.some((ownedTile) => {
+      const dx = Math.abs(tile.x - ownedTile.x);
+      const dy = Math.abs(tile.y - ownedTile.y);
+      return dx <= 1 && dy <= 1;
+    });
+  });
 };

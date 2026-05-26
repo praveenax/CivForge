@@ -9,6 +9,7 @@ const resourceGlyph = {
 };
 
 const improvementGlyph = {
+  settlement: "SE",
   mine: "MI",
   farm: "FA",
   archive: "AR",

@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { BUILDINGS } from "../game/data/buildings";
 import {
   getImprovementIdForResource,
+  getValidSettlementTiles,
   IMPROVEMENTS,
 } from "../game/data/improvements";
 import { RESOURCE_TYPES } from "../game/data/resources";
@@ -44,6 +46,8 @@ function QueueItem({ item, tileLabelById }) {
 }
 
 function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
+  const [isSettlementPickerOpen, setIsSettlementPickerOpen] = useState(false);
+
   if (!city) {
     return null;
   }
@@ -110,6 +114,13 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
     })
     .filter(Boolean);
 
+  const settlementImprovement = IMPROVEMENTS.settlement ?? null;
+  const isSettlementUnlocked = settlementImprovement
+    ? !settlementImprovement.requiredTech ||
+      player?.unlockedTechs.includes(settlementImprovement.requiredTech)
+    : false;
+  const validSettlementTiles = getValidSettlementTiles(city, tiles);
+
   const foodConsumed = getFoodConsumedPerTurn(city);
   const netFood = city.yields.food - foodConsumed;
   const foodNeededForNextPop =
@@ -141,6 +152,11 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
       return `${improvementName} (${resourceName} ${tile.x},${tile.y})`;
     });
   const ownerName = player?.name ?? city.owner;
+
+  const handleQueueSettlement = (tileId) => {
+    onQueueProduction(city.id, "improvement", "settlement", { tileId });
+    setIsSettlementPickerOpen(false);
+  };
 
   return (
     <aside
@@ -288,6 +304,18 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
           <section className="city-info-card">
             <h3>Add Improvement</h3>
             <div className="action-grid">
+              {settlementImprovement ? (
+                <button
+                  type="button"
+                  onClick={() => setIsSettlementPickerOpen(true)}
+                  disabled={
+                    !isSettlementUnlocked || !validSettlementTiles.length
+                  }
+                >
+                  {settlementImprovement.name} ({settlementImprovement.cost}) -
+                  Choose Tile
+                </button>
+              ) : null}
               {availableImprovements.map((entry) => {
                 const resourceName =
                   RESOURCE_TYPES[entry.resourceId]?.name ?? entry.resourceId;
@@ -312,7 +340,22 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
                 );
               })}
             </div>
-            {!availableImprovements.length ? (
+            {!isSettlementUnlocked && settlementImprovement ? (
+              <p className="city-empty-text">
+                Settlement requires {settlementImprovement.requiredTech}.
+              </p>
+            ) : null}
+            {!validSettlementTiles.length && settlementImprovement ? (
+              <p className="city-empty-text">
+                No valid settlement tile adjacent to your cultural border.
+              </p>
+            ) : null}
+            {!availableImprovements.length && !settlementImprovement ? (
+              <p className="city-empty-text">
+                No valid resource improvements available.
+              </p>
+            ) : null}
+            {!availableImprovements.length && settlementImprovement ? (
               <p className="city-empty-text">
                 No valid resource improvements available.
               </p>
@@ -335,6 +378,45 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
           </section>
         </div>
       </div>
+
+      {isSettlementPickerOpen ? (
+        <section
+          className="city-tile-picker-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="settlement-tile-picker-title"
+        >
+          <div className="city-tile-picker-card panel">
+            <h3 id="settlement-tile-picker-title">Choose Settlement Tile</h3>
+            <p>
+              Select a tile next to a culturally owned tile to place your
+              settlement.
+            </p>
+            <div className="city-tile-picker-grid">
+              {validSettlementTiles.map((tile) => (
+                <button
+                  key={tile.id}
+                  type="button"
+                  onClick={() => handleQueueSettlement(tile.id)}
+                >
+                  Tile {tile.x},{tile.y}
+                  {tile.resource
+                    ? ` - ${RESOURCE_TYPES[tile.resource]?.name ?? tile.resource}`
+                    : ""}
+                </button>
+              ))}
+            </div>
+            <div className="research-prompt-actions">
+              <button
+                type="button"
+                onClick={() => setIsSettlementPickerOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
     </aside>
   );
 }

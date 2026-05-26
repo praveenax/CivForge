@@ -1,5 +1,5 @@
 import { BUILDINGS } from "../data/buildings";
-import { IMPROVEMENTS } from "../data/improvements";
+import { getValidSettlementTiles, IMPROVEMENTS } from "../data/improvements";
 import { UNITS } from "../data/units";
 
 const getCost = (item) => {
@@ -68,7 +68,7 @@ export const processProductionQueue = (city, tiles) => {
     const tileId = current.tileId;
     const targetTile = tiles.find((tile) => tile.id === tileId);
 
-    if (!targetTile || targetTile.cityId !== city.id) {
+    if (!targetTile) {
       return {
         city: {
           ...city,
@@ -76,6 +76,32 @@ export const processProductionQueue = (city, tiles) => {
         },
         tiles,
       };
+    }
+
+    const isSettlement = current.id === "settlement";
+    if (!isSettlement && targetTile.cityId !== city.id) {
+      return {
+        city: {
+          ...city,
+          queue: rest,
+        },
+        tiles,
+      };
+    }
+
+    if (isSettlement) {
+      const validSettlementTileIds = new Set(
+        getValidSettlementTiles(city, tiles).map((entry) => entry.id),
+      );
+      if (!validSettlementTileIds.has(targetTile.id)) {
+        return {
+          city: {
+            ...city,
+            queue: rest,
+          },
+          tiles,
+        };
+      }
     }
 
     const updatedTiles = tiles.map((tile) => {
@@ -86,6 +112,8 @@ export const processProductionQueue = (city, tiles) => {
       return {
         ...tile,
         improvement: current.id,
+        owner: isSettlement ? city.owner : tile.owner,
+        cityId: isSettlement ? city.id : tile.cityId,
       };
     });
 

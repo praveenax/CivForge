@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { BUILDINGS } from "../data/buildings";
 import {
   getImprovementIdForResource,
+  getValidSettlementTiles,
   IMPROVEMENTS,
 } from "../data/improvements";
 import { TECHS } from "../data/techs";
@@ -368,15 +369,30 @@ export const useGameStore = create((set, get) => {
         if (type === "improvement") {
           const tile = state.tiles.find((entry) => entry.id === options.tileId);
 
-          if (!tile || tile.cityId !== city.id || !tile.resource) {
+          if (!tile) {
             return state;
           }
 
-          const expectedImprovementId = getImprovementIdForResource(
-            tile.resource,
-          );
-          if (expectedImprovementId !== id) {
-            return state;
+          if (id === "settlement") {
+            const validSettlementTileIds = new Set(
+              getValidSettlementTiles(city, state.tiles).map(
+                (entry) => entry.id,
+              ),
+            );
+            if (!validSettlementTileIds.has(tile.id)) {
+              return state;
+            }
+          } else {
+            if (tile.cityId !== city.id || !tile.resource) {
+              return state;
+            }
+
+            const expectedImprovementId = getImprovementIdForResource(
+              tile.resource,
+            );
+            if (expectedImprovementId !== id) {
+              return state;
+            }
           }
 
           if (tile.improvement) {
@@ -393,7 +409,7 @@ export const useGameStore = create((set, get) => {
           queueEntry = {
             ...queueEntry,
             tileId: tile.id,
-            resourceId: tile.resource,
+            resourceId: tile.resource ?? null,
           };
         }
 
