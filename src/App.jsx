@@ -1,12 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CityOverlay from "./components/CityOverlay";
 import TechTreeOverlay from "./components/TechTreeOverlay";
 import TileInfoPanel from "./components/TileInfoPanel";
 import TopBar from "./components/TopBar";
 import WorldGrid from "./components/WorldGrid";
-import { useGameStore } from "./game/store/gameStore";
+import {
+  CIVILIZATION_OPTIONS,
+  GAME_SAVE_KEY,
+  useGameStore,
+} from "./game/store/gameStore";
+
+const GAME_SCREENS = {
+  MENU: "menu",
+  SETUP: "setup",
+  PLAYING: "playing",
+};
+
+const DEFAULT_SETUP = {
+  civilizationId: CIVILIZATION_OPTIONS[0]?.id ?? "rome",
+  opponentCount: 2,
+};
 
 function App() {
+  const [screen, setScreen] = useState(GAME_SCREENS.MENU);
+  const [setup, setSetup] = useState(DEFAULT_SETUP);
+  const [menuError, setMenuError] = useState("");
+
   const turn = useGameStore((state) => state.turn);
   const tiles = useGameStore((state) => state.tiles);
   const cities = useGameStore((state) => state.cities);
@@ -14,6 +33,7 @@ function App() {
   const selectedCityId = useGameStore((state) => state.selectedCityId);
   const selectedTileId = useGameStore((state) => state.selectedTileId);
   const isTechTreeOpen = useGameStore((state) => state.isTechTreeOpen);
+  const gameSetup = useGameStore((state) => state.gameSetup);
 
   const selectCity = useGameStore((state) => state.selectCity);
   const closeCityOverlay = useGameStore((state) => state.closeCityOverlay);
@@ -23,6 +43,9 @@ function App() {
   const toggleTechTree = useGameStore((state) => state.toggleTechTree);
   const endTurn = useGameStore((state) => state.endTurn);
   const resetGame = useGameStore((state) => state.resetGame);
+  const startNewGame = useGameStore((state) => state.startNewGame);
+  const loadGameSnapshot = useGameStore((state) => state.loadGameSnapshot);
+  const exportGameSnapshot = useGameStore((state) => state.exportGameSnapshot);
   const getResearchProgress = useGameStore(
     (state) => state.getResearchProgress,
   );
@@ -32,8 +55,19 @@ function App() {
     cities.find((city) => city.id === selectedCityId) ?? null;
   const selectedTile = tiles.find((tile) => tile.id === selectedTileId) ?? null;
   const researchProgress = getResearchProgress();
+  const hasSavedGame = useMemo(() => {
+    try {
+      return Boolean(localStorage.getItem(GAME_SAVE_KEY));
+    } catch {
+      return false;
+    }
+  }, [screen]);
 
   useEffect(() => {
+    if (screen !== GAME_SCREENS.PLAYING) {
+      return undefined;
+    }
+
     const onKeyDown = (event) => {
       if (event.key !== "Enter" || event.repeat) {
         return;
@@ -60,7 +94,161 @@ function App() {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [endTurn]);
+  }, [endTurn, screen]);
+
+  useEffect(() => {
+    if (screen !== GAME_SCREENS.PLAYING) {
+      return;
+    }
+
+    try {
+      const snapshot = exportGameSnapshot();
+      localStorage.setItem(GAME_SAVE_KEY, JSON.stringify(snapshot));
+    } catch {
+      // Ignore storage errors so gameplay remains uninterrupted.
+    }
+  }, [
+    cities,
+    exportGameSnapshot,
+    gameSetup,
+    isTechTreeOpen,
+    players,
+    screen,
+    selectedCityId,
+    selectedTileId,
+    tiles,
+    turn,
+  ]);
+
+  const handleNewGame = () => {
+    setMenuError("");
+    setScreen(GAME_SCREENS.SETUP);
+  };
+
+  const handleStartGame = () => {
+    startNewGame(setup);
+    setMenuError("");
+    setScreen(GAME_SCREENS.PLAYING);
+  };
+
+  const handleLoadGame = () => {
+    setMenuError("");
+
+    try {
+      const raw = localStorage.getItem(GAME_SAVE_KEY);
+      if (!raw) {
+        setMenuError("No saved game found. Start a new game first.");
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      const didLoad = loadGameSnapshot(parsed);
+
+      if (!didLoad) {
+        setMenuError("Saved game data is invalid. Please start a new game.");
+        return;
+      }
+
+      setScreen(GAME_SCREENS.PLAYING);
+    } catch {
+      setMenuError("Unable to load save data. Please start a new game.");
+    }
+  };
+
+  if (screen === GAME_SCREENS.MENU) {
+    return (
+      <div className="app-shell menu-shell">
+        <section className="menu-card">
+          <h1>CivForge</h1>
+          <p className="menu-subtitle">
+            Forge your empire from the first dawn.
+          </p>
+          <div className="menu-actions">
+            <button type="button" onClick={handleNewGame}>
+              New Game
+            </button>
+            <button
+              type="button"
+              onClick={handleLoadGame}
+              disabled={!hasSavedGame}
+            >
+              Load Game
+            </button>
+          </div>
+          {!hasSavedGame ? (
+            <p className="menu-hint">
+              Load Game unlocks after your first auto-save.
+            </p>
+          ) : null}
+          {menuError ? <p className="menu-error">{menuError}</p> : null}
+        </section>
+      </div>
+    );
+  }
+
+  if (screen === GAME_SCREENS.SETUP) {
+    return (
+      <div className="app-shell menu-shell">
+        <section className="menu-card setup-card">
+          <h1>New Game Setup</h1>
+          <label className="menu-field" htmlFor="civilization-select">
+            <span>Civilization</span>
+            <select
+              id="civilization-select"
+              value={setup.civilizationId}
+              onChange={(event) =>
+                setSetup((previous) => ({
+                  ...previous,
+                  civilizationId: event.target.value,
+                }))
+              }
+            >
+              {CIVILIZATION_OPTIONS.map((civilization) => (
+                <option key={civilization.id} value={civilization.id}>
+                  {civilization.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="menu-field" htmlFor="opponent-count-select">
+            <span>Opponents</span>
+            <select
+              id="opponent-count-select"
+              value={setup.opponentCount}
+              onChange={(event) =>
+                setSetup((previous) => ({
+                  ...previous,
+                  opponentCount: Number(event.target.value),
+                }))
+              }
+            >
+              {Array.from({ length: 7 }, (_, index) => index + 1).map(
+                (count) => (
+                  <option key={count} value={count}>
+                    {count}
+                  </option>
+                ),
+              )}
+            </select>
+          </label>
+
+          <div className="menu-actions">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => setScreen(GAME_SCREENS.MENU)}
+            >
+              Back
+            </button>
+            <button type="button" onClick={handleStartGame}>
+              Start Game
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">

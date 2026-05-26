@@ -51,6 +51,102 @@ button:hover {
   /* padding: 18px; */
 }
 
+.menu-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.menu-card {
+  width: min(560px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.menu-card h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 0.03em;
+}
+
+.menu-subtitle {
+  margin: 0;
+  color: var(--ink-1);
+}
+
+.menu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.menu-actions button,
+.menu-field select {
+  background: var(--action);
+  color: #1f1a10;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  border-radius: 10px;
+  font: inherit;
+  padding: 9px 12px;
+  font-weight: 700;
+}
+
+.menu-actions button:hover,
+.menu-field select:hover {
+  background: var(--action-hover);
+}
+
+.menu-actions button.secondary {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink-0);
+  border-color: var(--line);
+}
+
+.menu-actions button.secondary:hover {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.menu-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.menu-hint {
+  margin: 0;
+  color: var(--ink-1);
+  font-size: 0.92rem;
+}
+
+.menu-error {
+  margin: 0;
+  color: #f5a5a0;
+  font-weight: 700;
+}
+
+.setup-card {
+  gap: 14px;
+}
+
+.menu-field {
+  display: grid;
+  gap: 8px;
+}
+
+.menu-field span {
+  color: var(--ink-1);
+  font-size: 0.92rem;
+}
+
+.menu-field select {
+  width: 100%;
+}
+
 .top-bar {
   display: grid;
   gap: 12px;
@@ -443,5 +539,13 @@ button:hover {
     bottom: 12px;
     width: 142px;
     padding: 6px;
+  }
+
+  .menu-card {
+    padding: 18px;
+  }
+
+  .menu-card h1 {
+    font-size: 1.6rem;
   }
 }
