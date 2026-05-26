@@ -27,7 +27,8 @@ function TopBar({
   player,
   researchProgress,
   onToggleTechTree,
-  onReset,
+  isSimulationRunning,
+  onToggleSimulation,
   onEndTurn,
 }) {
   const progressPct = Math.max(
@@ -98,8 +99,8 @@ function TopBar({
           <button type="button" onClick={onToggleTechTree}>
             Tech Tree
           </button>
-          <button type="button" onClick={onReset}>
-            Reset World
+          <button type="button" onClick={onToggleSimulation}>
+            {isSimulationRunning ? "Stop" : "Start"}
           </button>
           <TurnButton onEndTurn={onEndTurn} />
         </div>

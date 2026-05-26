@@ -25,6 +25,7 @@ function App() {
   const [screen, setScreen] = useState(GAME_SCREENS.MENU);
   const [setup, setSetup] = useState(DEFAULT_SETUP);
   const [menuError, setMenuError] = useState("");
+  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
 
   const turn = useGameStore((state) => state.turn);
   const tiles = useGameStore((state) => state.tiles);
@@ -42,7 +43,6 @@ function App() {
   const setResearch = useGameStore((state) => state.setResearch);
   const toggleTechTree = useGameStore((state) => state.toggleTechTree);
   const endTurn = useGameStore((state) => state.endTurn);
-  const resetGame = useGameStore((state) => state.resetGame);
   const startNewGame = useGameStore((state) => state.startNewGame);
   const loadGameSnapshot = useGameStore((state) => state.loadGameSnapshot);
   const exportGameSnapshot = useGameStore((state) => state.exportGameSnapshot);
@@ -61,6 +61,28 @@ function App() {
     } catch {
       return false;
     }
+  }, [screen]);
+
+  useEffect(() => {
+    if (!isSimulationRunning || screen !== GAME_SCREENS.PLAYING) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      endTurn();
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [endTurn, isSimulationRunning, screen]);
+
+  useEffect(() => {
+    if (screen === GAME_SCREENS.PLAYING) {
+      return;
+    }
+
+    setIsSimulationRunning(false);
   }, [screen]);
 
   useEffect(() => {
@@ -122,12 +144,14 @@ function App() {
 
   const handleNewGame = () => {
     setMenuError("");
+    setIsSimulationRunning(false);
     setScreen(GAME_SCREENS.SETUP);
   };
 
   const handleStartGame = () => {
     startNewGame(setup);
     setMenuError("");
+    setIsSimulationRunning(false);
     setScreen(GAME_SCREENS.PLAYING);
   };
 
@@ -149,6 +173,7 @@ function App() {
         return;
       }
 
+      setIsSimulationRunning(false);
       setScreen(GAME_SCREENS.PLAYING);
     } catch {
       setMenuError("Unable to load save data. Please start a new game.");
@@ -257,7 +282,10 @@ function App() {
         player={player}
         researchProgress={researchProgress}
         onToggleTechTree={toggleTechTree}
-        onReset={resetGame}
+        isSimulationRunning={isSimulationRunning}
+        onToggleSimulation={() =>
+          setIsSimulationRunning((previous) => !previous)
+        }
         onEndTurn={endTurn}
       />
 
