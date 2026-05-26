@@ -2,7 +2,6 @@ import CityOverlay from "./components/CityOverlay";
 import TechTreeOverlay from "./components/TechTreeOverlay";
 import TileInfoPanel from "./components/TileInfoPanel";
 import TopBar from "./components/TopBar";
-import TurnButton from "./components/TurnButton";
 import WorldGrid from "./components/WorldGrid";
 import { useGameStore } from "./game/store/gameStore";
 
@@ -41,6 +40,7 @@ function App() {
         researchProgress={researchProgress}
         onToggleTechTree={toggleTechTree}
         onReset={resetGame}
+        onEndTurn={endTurn}
       />
 
       <main className="game-layout">
@@ -51,12 +51,11 @@ function App() {
           onSelectTile={selectTile}
           onSelectCity={selectCity}
         />
-
-        <section className="side-column">
-          <TileInfoPanel tile={selectedTile} />
-          <TurnButton onEndTurn={endTurn} />
-        </section>
       </main>
+
+      <section className="side-column" style={{ display: "none" }}>
+        <TileInfoPanel tile={selectedTile} />
+      </section>
 
       {selectedCity ? (
         <CityOverlay

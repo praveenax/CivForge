@@ -46,9 +46,9 @@ button:hover {
 }
 
 .app-shell {
-  max-width: 1540px;
+  /* max-width: 1540px; */
   margin: 0 auto;
-  padding: 18px;
+  /* padding: 18px; */
 }
 
 .top-bar {
@@ -82,9 +82,18 @@ button:hover {
 }
 
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stats-row-prod {
+  display: flex;
+  flex-direction: row;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .stat-card {
@@ -135,8 +144,7 @@ button:hover {
 
 .game-layout {
   display: grid;
-  grid-template-columns: 1fr 310px;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .world-grid-wrapper {
@@ -146,22 +154,24 @@ button:hover {
   box-shadow: var(--shadow);
   padding: 10px;
   overflow: auto;
-  max-height: calc(100vh - 220px);
+  /* max-height: calc(100vh - 220px); */
 }
 
 .world-grid {
   display: grid;
-  gap: 2px;
+  gap: 0px;
   min-width: 850px;
 }
 
 .tile {
-  border: 1px solid rgba(11, 15, 17, 0.4);
+  /* border: 1px solid rgba(11, 15, 17, 0.4); */
   color: #081215;
   min-height: 26px;
+  /* width: 26px; */
   padding: 1px;
   text-align: left;
   position: relative;
+  border-radius: 0px;
 }
 
 .tile.selected {

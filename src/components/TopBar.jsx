@@ -1,3 +1,5 @@
+import TurnButton from "./TurnButton";
+
 function StatCard({ label, value }) {
   return (
     <div className="stat-card">
@@ -7,32 +9,43 @@ function StatCard({ label, value }) {
   );
 }
 
-function TopBar({ turn, player, researchProgress, onToggleTechTree, onReset }) {
+function TopBar({
+  turn,
+  player,
+  researchProgress,
+  onToggleTechTree,
+  onReset,
+  onEndTurn,
+}) {
   return (
     <header className="top-bar">
-      <div className="brand">
+      {/* <div className="brand">
         <h1>CivForge</h1>
-        <p>2D strategy MVP</p>
-      </div>
+   
+      </div> */}
 
       <div className="stats-row">
-        <StatCard label="Turn" value={turn} />
-        <StatCard label="Food" value={player?.stockpile.food ?? 0} />
-        <StatCard
-          label="Production"
-          value={player?.stockpile.production ?? 0}
-        />
-        <StatCard label="Gold" value={player?.stockpile.gold ?? 0} />
-        <StatCard label="Science" value={player?.stockpile.science ?? 0} />
-      </div>
+        <h3>CivForge</h3>
+        <div className="stats-row-prod">
+          <StatCard label="Turn" value={turn} />
+          <StatCard label="Food" value={player?.stockpile.food ?? 0} />
+          <StatCard
+            label="Production"
+            value={player?.stockpile.production ?? 0}
+          />
+          <StatCard label="Gold" value={player?.stockpile.gold ?? 0} />
+          <StatCard label="Science" value={player?.stockpile.science ?? 0} />
+        </div>
 
-      <div className="top-actions">
-        <button type="button" onClick={onToggleTechTree}>
-          Tech Tree
-        </button>
-        <button type="button" onClick={onReset}>
-          Reset World
-        </button>
+        <div className="top-actions">
+          <button type="button" onClick={onToggleTechTree}>
+            Tech Tree
+          </button>
+          <button type="button" onClick={onReset}>
+            Reset World
+          </button>
+          <TurnButton onEndTurn={onEndTurn} />
+        </div>
       </div>
 
       <div className="research-line">
