@@ -27,6 +27,7 @@ function TopBar({
   player,
   researchProgress,
   onToggleTechTree,
+  onOpenList,
   isSimulationRunning,
   onToggleSimulation,
   onEndTurn,
@@ -99,9 +100,13 @@ function TopBar({
           <button type="button" onClick={onToggleTechTree}>
             Tech Tree
           </button>
+          <button type="button" onClick={onOpenList}>
+            List
+          </button>
           <button type="button" onClick={onToggleSimulation}>
             {isSimulationRunning ? "Stop" : "Start"}
           </button>
+
           <TurnButton onEndTurn={onEndTurn} />
         </div>
       </div>

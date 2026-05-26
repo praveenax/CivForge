@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import CityOverlay from "./components/CityOverlay";
+import ListOverlay from "./components/ListOverlay";
 import ResearchPromptModal from "./components/ResearchPromptModal";
 import TechTreeOverlay from "./components/TechTreeOverlay";
 import TileInfoPanel from "./components/TileInfoPanel";
@@ -28,6 +29,7 @@ function App() {
   const [menuError, setMenuError] = useState("");
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [isResearchPromptOpen, setIsResearchPromptOpen] = useState(false);
+  const [isListOverlayOpen, setIsListOverlayOpen] = useState(false);
 
   const turn = useGameStore((state) => state.turn);
   const tiles = useGameStore((state) => state.tiles);
@@ -86,6 +88,7 @@ function App() {
 
     setIsSimulationRunning(false);
     setIsResearchPromptOpen(false);
+    setIsListOverlayOpen(false);
   }, [screen]);
 
   useEffect(() => {
@@ -177,6 +180,7 @@ function App() {
     setMenuError("");
     setIsSimulationRunning(false);
     setIsResearchPromptOpen(false);
+    setIsListOverlayOpen(false);
     setScreen(GAME_SCREENS.PLAYING);
   };
 
@@ -200,6 +204,7 @@ function App() {
 
       setIsSimulationRunning(false);
       setIsResearchPromptOpen(false);
+      setIsListOverlayOpen(false);
       setScreen(GAME_SCREENS.PLAYING);
     } catch {
       setMenuError("Unable to load save data. Please start a new game.");
@@ -308,6 +313,7 @@ function App() {
         player={player}
         researchProgress={researchProgress}
         onToggleTechTree={toggleTechTree}
+        onOpenList={() => setIsListOverlayOpen(true)}
         isSimulationRunning={isSimulationRunning}
         onToggleSimulation={() =>
           setIsSimulationRunning((previous) => !previous)
@@ -352,6 +358,14 @@ function App() {
         isTechTreeOpen={isTechTreeOpen}
         onToggleTechTree={toggleTechTree}
         onClose={() => setIsResearchPromptOpen(false)}
+      />
+
+      <ListOverlay
+        isOpen={isListOverlayOpen}
+        cities={cities}
+        tiles={tiles}
+        players={players}
+        onClose={() => setIsListOverlayOpen(false)}
       />
     </div>
   );
