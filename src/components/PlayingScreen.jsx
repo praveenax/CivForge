@@ -1,0 +1,102 @@
+import CityOverlay from "./CityOverlay";
+import ListOverlay from "./ListOverlay";
+import ResearchPromptModal from "./ResearchPromptModal";
+import TechTreeOverlay from "./TechTreeOverlay";
+import TileInfoPanel from "./TileInfoPanel";
+import TopBar from "./TopBar";
+import WorldGrid from "./WorldGrid";
+
+function PlayingScreen({
+  turn,
+  player,
+  researchProgress,
+  onToggleTechTree,
+  onOpenList,
+  isSimulationRunning,
+  onToggleSimulation,
+  onEndTurn,
+  tiles,
+  cities,
+  players,
+  locateRequest,
+  selectedTileId,
+  onSelectTile,
+  onSelectCity,
+  selectedTile,
+  selectedCity,
+  onCloseCityOverlay,
+  onQueueProduction,
+  isTechTreeOpen,
+  onSetResearch,
+  isResearchPromptOpen,
+  onCloseResearchPrompt,
+  isListOverlayOpen,
+  onCloseListOverlay,
+  onLocateCity,
+}) {
+  return (
+    <div className="app-shell">
+      <TopBar
+        turn={turn}
+        player={player}
+        researchProgress={researchProgress}
+        onToggleTechTree={onToggleTechTree}
+        onOpenList={onOpenList}
+        isSimulationRunning={isSimulationRunning}
+        onToggleSimulation={onToggleSimulation}
+        onEndTurn={onEndTurn}
+      />
+
+      <main className="game-layout">
+        <WorldGrid
+          tiles={tiles}
+          cities={cities}
+          players={players}
+          locateRequest={locateRequest}
+          selectedTileId={selectedTileId}
+          onSelectTile={onSelectTile}
+          onSelectCity={onSelectCity}
+        />
+      </main>
+
+      <section className="side-column" style={{ display: "none" }}>
+        <TileInfoPanel tile={selectedTile} />
+      </section>
+
+      {selectedCity ? (
+        <CityOverlay
+          city={selectedCity}
+          player={player}
+          onClose={onCloseCityOverlay}
+          onQueueProduction={onQueueProduction}
+        />
+      ) : null}
+
+      {isTechTreeOpen && player ? (
+        <TechTreeOverlay
+          player={player}
+          onClose={onToggleTechTree}
+          onSelectTech={onSetResearch}
+        />
+      ) : null}
+
+      <ResearchPromptModal
+        isOpen={isResearchPromptOpen}
+        isTechTreeOpen={isTechTreeOpen}
+        onToggleTechTree={onToggleTechTree}
+        onClose={onCloseResearchPrompt}
+      />
+
+      <ListOverlay
+        isOpen={isListOverlayOpen}
+        cities={cities}
+        tiles={tiles}
+        players={players}
+        onClose={onCloseListOverlay}
+        onLocateCity={onLocateCity}
+      />
+    </div>
+  );
+}
+
+export default PlayingScreen;

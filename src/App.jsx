@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import CityOverlay from "./components/CityOverlay";
-import ListOverlay from "./components/ListOverlay";
-import ResearchPromptModal from "./components/ResearchPromptModal";
-import TechTreeOverlay from "./components/TechTreeOverlay";
-import TileInfoPanel from "./components/TileInfoPanel";
-import TopBar from "./components/TopBar";
-import WorldGrid from "./components/WorldGrid";
+import { useEffect, useState } from "react";
+import MenuScreen from "./components/MenuScreen";
+import PlayingScreen from "./components/PlayingScreen";
+import SetupScreen from "./components/SetupScreen";
 import {
   CIVILIZATION_OPTIONS,
   GAME_SAVE_KEY,
@@ -60,13 +56,13 @@ function App() {
     cities.find((city) => city.id === selectedCityId) ?? null;
   const selectedTile = tiles.find((tile) => tile.id === selectedTileId) ?? null;
   const researchProgress = getResearchProgress();
-  const hasSavedGame = useMemo(() => {
+  const hasSavedGame = (() => {
     try {
       return Boolean(localStorage.getItem(GAME_SAVE_KEY));
     } catch {
       return false;
     }
-  }, [screen]);
+  })();
 
   useEffect(() => {
     if (!isSimulationRunning || screen !== GAME_SCREENS.PLAYING) {
@@ -83,16 +79,6 @@ function App() {
   }, [endTurn, isSimulationRunning, screen]);
 
   useEffect(() => {
-    if (screen === GAME_SCREENS.PLAYING) {
-      return;
-    }
-
-    setIsSimulationRunning(false);
-    setIsResearchPromptOpen(false);
-    setIsListOverlayOpen(false);
-  }, [screen]);
-
-  useEffect(() => {
     if (screen !== GAME_SCREENS.PLAYING || !isSimulationRunning) {
       return;
     }
@@ -101,8 +87,14 @@ function App() {
       return;
     }
 
-    setIsSimulationRunning(false);
-    setIsResearchPromptOpen(true);
+    const timeoutId = window.setTimeout(() => {
+      setIsSimulationRunning(false);
+      setIsResearchPromptOpen(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [isSimulationRunning, researchProgress.currentTech, screen]);
 
   useEffect(() => {
@@ -110,7 +102,13 @@ function App() {
       return;
     }
 
-    setIsResearchPromptOpen(false);
+    const timeoutId = window.setTimeout(() => {
+      setIsResearchPromptOpen(false);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [researchProgress.currentTech]);
 
   useEffect(() => {
@@ -212,181 +210,76 @@ function App() {
     }
   };
 
+  const handleLocateCity = (city) => {
+    const tile = tiles.find(
+      (entry) => entry.x === city.x && entry.y === city.y,
+    );
+
+    if (tile) {
+      selectTile(tile.id);
+    }
+
+    setLocateRequest({
+      x: city.x,
+      y: city.y,
+      cityId: city.id,
+      requestId: Date.now(),
+    });
+    setIsListOverlayOpen(false);
+  };
+
   if (screen === GAME_SCREENS.MENU) {
     return (
-      <div className="app-shell menu-shell">
-        <section className="menu-card">
-          <h1>CivForge</h1>
-          <p className="menu-subtitle">
-            Forge your empire from the first dawn.
-          </p>
-          <div className="menu-actions">
-            <button type="button" onClick={handleNewGame}>
-              New Game
-            </button>
-            <button
-              type="button"
-              onClick={handleLoadGame}
-              disabled={!hasSavedGame}
-            >
-              Load Game
-            </button>
-          </div>
-          {!hasSavedGame ? (
-            <p className="menu-hint">
-              Load Game unlocks after your first auto-save.
-            </p>
-          ) : null}
-          {menuError ? <p className="menu-error">{menuError}</p> : null}
-        </section>
-      </div>
+      <MenuScreen
+        hasSavedGame={hasSavedGame}
+        menuError={menuError}
+        onNewGame={handleNewGame}
+        onLoadGame={handleLoadGame}
+      />
     );
   }
 
   if (screen === GAME_SCREENS.SETUP) {
     return (
-      <div className="app-shell menu-shell">
-        <section className="menu-card setup-card">
-          <h1>New Game Setup</h1>
-          <label className="menu-field" htmlFor="civilization-select">
-            <span>Civilization</span>
-            <select
-              id="civilization-select"
-              value={setup.civilizationId}
-              onChange={(event) =>
-                setSetup((previous) => ({
-                  ...previous,
-                  civilizationId: event.target.value,
-                }))
-              }
-            >
-              {CIVILIZATION_OPTIONS.map((civilization) => (
-                <option key={civilization.id} value={civilization.id}>
-                  {civilization.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="menu-field" htmlFor="opponent-count-select">
-            <span>Opponents</span>
-            <select
-              id="opponent-count-select"
-              value={setup.opponentCount}
-              onChange={(event) =>
-                setSetup((previous) => ({
-                  ...previous,
-                  opponentCount: Number(event.target.value),
-                }))
-              }
-            >
-              {Array.from({ length: 7 }, (_, index) => index + 1).map(
-                (count) => (
-                  <option key={count} value={count}>
-                    {count}
-                  </option>
-                ),
-              )}
-            </select>
-          </label>
-
-          <div className="menu-actions">
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => setScreen(GAME_SCREENS.MENU)}
-            >
-              Back
-            </button>
-            <button type="button" onClick={handleStartGame}>
-              Start Game
-            </button>
-          </div>
-        </section>
-      </div>
+      <SetupScreen
+        setup={setup}
+        civilizationOptions={CIVILIZATION_OPTIONS}
+        onSetupChange={setSetup}
+        onBack={() => setScreen(GAME_SCREENS.MENU)}
+        onStartGame={handleStartGame}
+      />
     );
   }
 
   return (
-    <div className="app-shell">
-      <TopBar
-        turn={turn}
-        player={player}
-        researchProgress={researchProgress}
-        onToggleTechTree={toggleTechTree}
-        onOpenList={() => setIsListOverlayOpen(true)}
-        isSimulationRunning={isSimulationRunning}
-        onToggleSimulation={() =>
-          setIsSimulationRunning((previous) => !previous)
-        }
-        onEndTurn={endTurn}
-      />
-
-      <main className="game-layout">
-        <WorldGrid
-          tiles={tiles}
-          cities={cities}
-          players={players}
-          locateRequest={locateRequest}
-          selectedTileId={selectedTileId}
-          onSelectTile={selectTile}
-          onSelectCity={selectCity}
-        />
-      </main>
-
-      <section className="side-column" style={{ display: "none" }}>
-        <TileInfoPanel tile={selectedTile} />
-      </section>
-
-      {selectedCity ? (
-        <CityOverlay
-          city={selectedCity}
-          player={player}
-          onClose={closeCityOverlay}
-          onQueueProduction={queueProduction}
-        />
-      ) : null}
-
-      {isTechTreeOpen && player ? (
-        <TechTreeOverlay
-          player={player}
-          onClose={toggleTechTree}
-          onSelectTech={setResearch}
-        />
-      ) : null}
-
-      <ResearchPromptModal
-        isOpen={isResearchPromptOpen}
-        isTechTreeOpen={isTechTreeOpen}
-        onToggleTechTree={toggleTechTree}
-        onClose={() => setIsResearchPromptOpen(false)}
-      />
-
-      <ListOverlay
-        isOpen={isListOverlayOpen}
-        cities={cities}
-        tiles={tiles}
-        players={players}
-        onClose={() => setIsListOverlayOpen(false)}
-        onLocateCity={(city) => {
-          const tile = tiles.find(
-            (entry) => entry.x === city.x && entry.y === city.y,
-          );
-
-          if (tile) {
-            selectTile(tile.id);
-          }
-
-          setLocateRequest({
-            x: city.x,
-            y: city.y,
-            cityId: city.id,
-            requestId: Date.now(),
-          });
-          setIsListOverlayOpen(false);
-        }}
-      />
-    </div>
+    <PlayingScreen
+      turn={turn}
+      player={player}
+      researchProgress={researchProgress}
+      onToggleTechTree={toggleTechTree}
+      onOpenList={() => setIsListOverlayOpen(true)}
+      isSimulationRunning={isSimulationRunning}
+      onToggleSimulation={() => setIsSimulationRunning((previous) => !previous)}
+      onEndTurn={endTurn}
+      tiles={tiles}
+      cities={cities}
+      players={players}
+      locateRequest={locateRequest}
+      selectedTileId={selectedTileId}
+      onSelectTile={selectTile}
+      onSelectCity={selectCity}
+      selectedTile={selectedTile}
+      selectedCity={selectedCity}
+      onCloseCityOverlay={closeCityOverlay}
+      onQueueProduction={queueProduction}
+      isTechTreeOpen={isTechTreeOpen}
+      onSetResearch={setResearch}
+      isResearchPromptOpen={isResearchPromptOpen}
+      onCloseResearchPrompt={() => setIsResearchPromptOpen(false)}
+      isListOverlayOpen={isListOverlayOpen}
+      onCloseListOverlay={() => setIsListOverlayOpen(false)}
+      onLocateCity={handleLocateCity}
+    />
   );
 }
 
