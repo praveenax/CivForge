@@ -7,13 +7,24 @@ const resourceGlyph = {
   manuscripts: "M",
 };
 
+const PLAYER_OWNER_ID = "player1";
+
 function Tile({ tile, isSelected, hasCity, onClick }) {
   const terrain = TERRAIN_TYPES[tile.terrain];
+  const isPlayerOwned = tile.owner === PLAYER_OWNER_ID;
+  const tileClassName = [
+    "tile",
+    isSelected ? "selected" : "",
+    hasCity ? "city" : "",
+    isPlayerOwned ? "player-owned" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <button
       type="button"
-      className={`tile ${isSelected ? "selected" : ""} ${hasCity ? "city" : ""}`}
+      className={tileClassName}
       style={{ backgroundColor: terrain?.color }}
       onClick={onClick}
       aria-label={`Tile ${tile.x},${tile.y} ${terrain?.name ?? tile.terrain}`}

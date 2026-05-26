@@ -250,8 +250,23 @@ button:hover {
   outline-offset: -2px;
 }
 
+.tile.player-owned {
+  box-shadow:
+    inset 0 0 0 1.5px rgba(214, 68, 68, 0.78),
+    inset 0 0 0 999px rgba(214, 68, 68, 0.2);
+  border: 1px dashed rgba(214, 68, 68, 0.78);
+  border-style: dashed;
+}
+
 .tile.city {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45);
+}
+
+.tile.player-owned.city {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+    inset 0 0 0 3px rgba(214, 68, 68, 0.78),
+    inset 0 0 0 999px rgba(214, 68, 68, 0.2);
 }
 
 .tile-coord {
