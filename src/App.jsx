@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import CityOverlay from "./components/CityOverlay";
+import ResearchPromptModal from "./components/ResearchPromptModal";
 import TechTreeOverlay from "./components/TechTreeOverlay";
 import TileInfoPanel from "./components/TileInfoPanel";
 import TopBar from "./components/TopBar";
@@ -26,6 +27,7 @@ function App() {
   const [setup, setSetup] = useState(DEFAULT_SETUP);
   const [menuError, setMenuError] = useState("");
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
+  const [isResearchPromptOpen, setIsResearchPromptOpen] = useState(false);
 
   const turn = useGameStore((state) => state.turn);
   const tiles = useGameStore((state) => state.tiles);
@@ -83,7 +85,29 @@ function App() {
     }
 
     setIsSimulationRunning(false);
+    setIsResearchPromptOpen(false);
   }, [screen]);
+
+  useEffect(() => {
+    if (screen !== GAME_SCREENS.PLAYING || !isSimulationRunning) {
+      return;
+    }
+
+    if (researchProgress.currentTech) {
+      return;
+    }
+
+    setIsSimulationRunning(false);
+    setIsResearchPromptOpen(true);
+  }, [isSimulationRunning, researchProgress.currentTech, screen]);
+
+  useEffect(() => {
+    if (!researchProgress.currentTech) {
+      return;
+    }
+
+    setIsResearchPromptOpen(false);
+  }, [researchProgress.currentTech]);
 
   useEffect(() => {
     if (screen !== GAME_SCREENS.PLAYING) {
@@ -152,6 +176,7 @@ function App() {
     startNewGame(setup);
     setMenuError("");
     setIsSimulationRunning(false);
+    setIsResearchPromptOpen(false);
     setScreen(GAME_SCREENS.PLAYING);
   };
 
@@ -174,6 +199,7 @@ function App() {
       }
 
       setIsSimulationRunning(false);
+      setIsResearchPromptOpen(false);
       setScreen(GAME_SCREENS.PLAYING);
     } catch {
       setMenuError("Unable to load save data. Please start a new game.");
@@ -320,6 +346,13 @@ function App() {
           onSelectTech={setResearch}
         />
       ) : null}
+
+      <ResearchPromptModal
+        isOpen={isResearchPromptOpen}
+        isTechTreeOpen={isTechTreeOpen}
+        onToggleTechTree={toggleTechTree}
+        onClose={() => setIsResearchPromptOpen(false)}
+      />
     </div>
   );
 }
