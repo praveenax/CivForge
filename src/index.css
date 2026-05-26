@@ -481,6 +481,19 @@ button:hover {
   font-weight: 800;
 }
 
+.tile-improvement {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  color: #eef4ef;
+  background: rgba(20, 31, 36, 0.72);
+  border: 1px solid rgba(238, 244, 239, 0.28);
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
 .tile-city {
   right: 15px;
   color: #f1f2df;
@@ -705,6 +718,7 @@ button:hover {
 
 .city-actions-columns {
   margin-top: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .city-empty-text {

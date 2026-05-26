@@ -1,5 +1,9 @@
 import { create } from "zustand";
 import { BUILDINGS } from "../data/buildings";
+import {
+  getImprovementIdForResource,
+  IMPROVEMENTS,
+} from "../data/improvements";
 import { TECHS } from "../data/techs";
 import { UNITS } from "../data/units";
 import { generateMap } from "../systems/mapGenerator";
@@ -329,7 +333,7 @@ export const useGameStore = create((set, get) => {
     toggleTechTree: () =>
       set((state) => ({ isTechTreeOpen: !state.isTechTreeOpen })),
 
-    queueProduction: (cityId, type, id) =>
+    queueProduction: (cityId, type, id, options = {}) =>
       set((state) => {
         const city = state.cities.find((entry) => entry.id === cityId);
         if (!city) {
@@ -337,11 +341,60 @@ export const useGameStore = create((set, get) => {
         }
 
         const player = state.players.find((entry) => entry.id === city.owner);
-        const registry = type === "building" ? BUILDINGS : UNITS;
+        const registry =
+          type === "building"
+            ? BUILDINGS
+            : type === "unit"
+              ? UNITS
+              : type === "improvement"
+                ? IMPROVEMENTS
+                : null;
+        if (!registry) {
+          return state;
+        }
+
         const item = registry[id];
 
         if (!player || !item) {
           return state;
+        }
+
+        let queueEntry = {
+          type,
+          id,
+          progress: 0,
+        };
+
+        if (type === "improvement") {
+          const tile = state.tiles.find((entry) => entry.id === options.tileId);
+
+          if (!tile || tile.cityId !== city.id || !tile.resource) {
+            return state;
+          }
+
+          const expectedImprovementId = getImprovementIdForResource(
+            tile.resource,
+          );
+          if (expectedImprovementId !== id) {
+            return state;
+          }
+
+          if (tile.improvement) {
+            return state;
+          }
+
+          const hasQueuedTileImprovement = city.queue.some(
+            (entry) => entry.type === "improvement" && entry.tileId === tile.id,
+          );
+          if (hasQueuedTileImprovement) {
+            return state;
+          }
+
+          queueEntry = {
+            ...queueEntry,
+            tileId: tile.id,
+            resourceId: tile.resource,
+          };
         }
 
         const techRequirement = item.requiredTech;
@@ -363,7 +416,7 @@ export const useGameStore = create((set, get) => {
 
           return {
             ...entry,
-            queue: [...entry.queue, { type, id, progress: 0 }],
+            queue: [...entry.queue, queueEntry],
           };
         });
 

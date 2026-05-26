@@ -1,4 +1,9 @@
 import { BUILDINGS } from "../game/data/buildings";
+import {
+  getImprovementIdForResource,
+  IMPROVEMENTS,
+} from "../game/data/improvements";
+import { RESOURCE_TYPES } from "../game/data/resources";
 import { UNITS } from "../game/data/units";
 import {
   getCultureNeededForNextLevel,
@@ -8,18 +13,27 @@ import {
 
 const getEntryLabel = (registry, id) => registry[id]?.name ?? id;
 
-function QueueItem({ item }) {
-  const source = item.type === "building" ? BUILDINGS : UNITS;
+function QueueItem({ item, tileLabelById }) {
+  const source =
+    item.type === "building"
+      ? BUILDINGS
+      : item.type === "unit"
+        ? UNITS
+        : IMPROVEMENTS;
   const config = source[item.id];
   const cost = config?.cost ?? 0;
   const progress =
     cost > 0 ? Math.min(100, Math.round((item.progress / cost) * 100)) : 0;
+  const tileLabel = item.tileId ? tileLabelById.get(item.tileId) : null;
 
   return (
     <li className="queue-item">
       <div>
         <strong>{config?.name ?? item.id}</strong>
-        <p className="queue-item-meta">{item.type}</p>
+        <p className="queue-item-meta">
+          {item.type}
+          {tileLabel ? ` - ${tileLabel}` : ""}
+        </p>
       </div>
       <div className="queue-item-progress">
         <strong>{progress}%</strong>
@@ -29,10 +43,15 @@ function QueueItem({ item }) {
   );
 }
 
-function CityOverlay({ city, player, onClose, onQueueProduction }) {
+function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
   if (!city) {
     return null;
   }
+
+  const cityTiles = (tiles ?? []).filter((tile) => tile.cityId === city.id);
+  const tileLabelById = new Map(
+    cityTiles.map((tile) => [tile.id, `Tile ${tile.x},${tile.y}`]),
+  );
 
   const availableBuildings = Object.values(BUILDINGS).filter((building) => {
     if (city.buildings.includes(building.id)) {
@@ -53,6 +72,43 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
 
     return player?.unlockedTechs.includes(unit.requiredTech);
   });
+
+  const availableImprovements = cityTiles
+    .filter((tile) => tile.resource && !tile.improvement)
+    .map((tile) => {
+      const improvementId = getImprovementIdForResource(tile.resource);
+      if (!improvementId) {
+        return null;
+      }
+
+      const improvement = IMPROVEMENTS[improvementId];
+      if (!improvement) {
+        return null;
+      }
+
+      if (
+        improvement.requiredTech &&
+        !player?.unlockedTechs.includes(improvement.requiredTech)
+      ) {
+        return null;
+      }
+
+      const hasQueuedTileImprovement = city.queue.some(
+        (entry) => entry.type === "improvement" && entry.tileId === tile.id,
+      );
+      if (hasQueuedTileImprovement) {
+        return null;
+      }
+
+      return {
+        tileId: tile.id,
+        x: tile.x,
+        y: tile.y,
+        resourceId: tile.resource,
+        improvement,
+      };
+    })
+    .filter(Boolean);
 
   const foodConsumed = getFoodConsumedPerTurn(city);
   const netFood = city.yields.food - foodConsumed;
@@ -76,6 +132,14 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
   const unitNames = (city.units ?? []).map((unitId) =>
     getEntryLabel(UNITS, unitId),
   );
+  const improvementNames = cityTiles
+    .filter((tile) => tile.improvement)
+    .map((tile) => {
+      const improvementName = getEntryLabel(IMPROVEMENTS, tile.improvement);
+      const resourceName =
+        RESOURCE_TYPES[tile.resource]?.name ?? tile.resource ?? "Resource";
+      return `${improvementName} (${resourceName} ${tile.x},${tile.y})`;
+    });
   const ownerName = player?.name ?? city.owner;
 
   return (
@@ -148,6 +212,12 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
               <span>Units</span>
               <p>{unitNames.length ? unitNames.join(", ") : "None"}</p>
             </div>
+            <div className="city-tag-block">
+              <span>Improvements</span>
+              <p>
+                {improvementNames.length ? improvementNames.join(", ") : "None"}
+              </p>
+            </div>
           </section>
 
           <section className="city-info-card">
@@ -185,6 +255,7 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
                 <QueueItem
                   key={`${item.type}-${item.id}-${index}`}
                   item={item}
+                  tileLabelById={tileLabelById}
                 />
               ))}
             </ul>
@@ -211,6 +282,40 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
             </div>
             {!availableBuildings.length ? (
               <p className="city-empty-text">No new buildings available.</p>
+            ) : null}
+          </section>
+
+          <section className="city-info-card">
+            <h3>Add Improvement</h3>
+            <div className="action-grid">
+              {availableImprovements.map((entry) => {
+                const resourceName =
+                  RESOURCE_TYPES[entry.resourceId]?.name ?? entry.resourceId;
+                return (
+                  <button
+                    key={`${entry.tileId}-${entry.improvement.id}`}
+                    type="button"
+                    onClick={() =>
+                      onQueueProduction(
+                        city.id,
+                        "improvement",
+                        entry.improvement.id,
+                        {
+                          tileId: entry.tileId,
+                        },
+                      )
+                    }
+                  >
+                    {entry.improvement.name} ({entry.improvement.cost}) -{" "}
+                    {resourceName} {entry.x},{entry.y}
+                  </button>
+                );
+              })}
+            </div>
+            {!availableImprovements.length ? (
+              <p className="city-empty-text">
+                No valid resource improvements available.
+              </p>
             ) : null}
           </section>
 

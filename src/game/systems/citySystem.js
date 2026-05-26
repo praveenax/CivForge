@@ -1,4 +1,5 @@
 import { BUILDINGS } from "../data/buildings";
+import { IMPROVEMENTS } from "../data/improvements";
 import { RESOURCE_TYPES } from "../data/resources";
 import { TERRAIN_TYPES } from "../data/terrain";
 import { getNeighborTiles } from "./mapGenerator";
@@ -54,8 +55,14 @@ export const calculateCityYields = (city, tiles) => {
       const resourceYield = tile.resource
         ? normalizeYields(RESOURCE_TYPES[tile.resource]?.yields)
         : EMPTY_YIELDS;
+      const improvementYield = tile.improvement
+        ? normalizeYields(IMPROVEMENTS[tile.improvement]?.effects)
+        : EMPTY_YIELDS;
 
-      return addYields(sum, addYields(terrainYield, resourceYield));
+      return addYields(
+        sum,
+        addYields(addYields(terrainYield, resourceYield), improvementYield),
+      );
     },
     { food: 1, production: 1, gold: 1, science: 1, culture: 1 },
   );

@@ -25,6 +25,9 @@ function App() {
   const [menuError, setMenuError] = useState("");
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [isResearchPromptOpen, setIsResearchPromptOpen] = useState(false);
+  const [isNoProductionPromptOpen, setIsNoProductionPromptOpen] =
+    useState(false);
+  const [noProductionCityId, setNoProductionCityId] = useState(null);
   const [isListOverlayOpen, setIsListOverlayOpen] = useState(false);
   const [locateRequest, setLocateRequest] = useState(null);
 
@@ -54,6 +57,8 @@ function App() {
   const player = players.find((entry) => entry.id === "player1") ?? null;
   const selectedCity =
     cities.find((city) => city.id === selectedCityId) ?? null;
+  const noProductionCity =
+    cities.find((city) => city.id === noProductionCityId) ?? null;
   const selectedTile = tiles.find((tile) => tile.id === selectedTileId) ?? null;
   const researchProgress = getResearchProgress();
   const hasSavedGame = (() => {
@@ -71,7 +76,7 @@ function App() {
 
     const intervalId = window.setInterval(() => {
       endTurn();
-    }, 1000);
+    }, 2000);
 
     return () => {
       window.clearInterval(intervalId);
@@ -96,6 +101,34 @@ function App() {
       window.clearTimeout(timeoutId);
     };
   }, [isSimulationRunning, researchProgress.currentTech, screen]);
+
+  useEffect(() => {
+    if (screen !== GAME_SCREENS.PLAYING || !isSimulationRunning || !player) {
+      return;
+    }
+
+    const blockedCity = cities.find((city) => {
+      if (city.owner !== player.id) {
+        return false;
+      }
+
+      return (city.queue ?? []).length === 0;
+    });
+
+    if (!blockedCity) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsSimulationRunning(false);
+      setNoProductionCityId(blockedCity.id);
+      setIsNoProductionPromptOpen(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [cities, isSimulationRunning, player, screen]);
 
   useEffect(() => {
     if (!researchProgress.currentTech) {
@@ -171,6 +204,8 @@ function App() {
   const handleNewGame = () => {
     setMenuError("");
     setIsSimulationRunning(false);
+    setIsNoProductionPromptOpen(false);
+    setNoProductionCityId(null);
     setScreen(GAME_SCREENS.SETUP);
   };
 
@@ -179,6 +214,8 @@ function App() {
     setMenuError("");
     setIsSimulationRunning(false);
     setIsResearchPromptOpen(false);
+    setIsNoProductionPromptOpen(false);
+    setNoProductionCityId(null);
     setIsListOverlayOpen(false);
     setScreen(GAME_SCREENS.PLAYING);
   };
@@ -203,6 +240,8 @@ function App() {
 
       setIsSimulationRunning(false);
       setIsResearchPromptOpen(false);
+      setIsNoProductionPromptOpen(false);
+      setNoProductionCityId(null);
       setIsListOverlayOpen(false);
       setScreen(GAME_SCREENS.PLAYING);
     } catch {
@@ -226,6 +265,16 @@ function App() {
       requestId: Date.now(),
     });
     setIsListOverlayOpen(false);
+  };
+
+  const handleLocateNoProductionCity = () => {
+    if (!noProductionCity) {
+      return;
+    }
+
+    selectCity(noProductionCity.id);
+    handleLocateCity(noProductionCity);
+    setIsNoProductionPromptOpen(false);
   };
 
   if (screen === GAME_SCREENS.MENU) {
@@ -276,6 +325,10 @@ function App() {
       onSetResearch={setResearch}
       isResearchPromptOpen={isResearchPromptOpen}
       onCloseResearchPrompt={() => setIsResearchPromptOpen(false)}
+      isNoProductionPromptOpen={isNoProductionPromptOpen}
+      noProductionCity={noProductionCity}
+      onLocateNoProductionCity={handleLocateNoProductionCity}
+      onCloseNoProductionPrompt={() => setIsNoProductionPromptOpen(false)}
       isListOverlayOpen={isListOverlayOpen}
       onCloseListOverlay={() => setIsListOverlayOpen(false)}
       onLocateCity={handleLocateCity}

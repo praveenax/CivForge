@@ -1,5 +1,6 @@
 import CityOverlay from "./CityOverlay";
 import ListOverlay from "./ListOverlay";
+import NoProductionPromptModal from "./NoProductionPromptModal";
 import ResearchPromptModal from "./ResearchPromptModal";
 import TechTreeOverlay from "./TechTreeOverlay";
 import TileInfoPanel from "./TileInfoPanel";
@@ -30,6 +31,10 @@ function PlayingScreen({
   onSetResearch,
   isResearchPromptOpen,
   onCloseResearchPrompt,
+  isNoProductionPromptOpen,
+  noProductionCity,
+  onLocateNoProductionCity,
+  onCloseNoProductionPrompt,
   isListOverlayOpen,
   onCloseListOverlay,
   onLocateCity,
@@ -67,6 +72,7 @@ function PlayingScreen({
         <CityOverlay
           city={selectedCity}
           player={player}
+          tiles={tiles}
           onClose={onCloseCityOverlay}
           onQueueProduction={onQueueProduction}
         />
@@ -85,6 +91,13 @@ function PlayingScreen({
         isTechTreeOpen={isTechTreeOpen}
         onToggleTechTree={onToggleTechTree}
         onClose={onCloseResearchPrompt}
+      />
+
+      <NoProductionPromptModal
+        isOpen={isNoProductionPromptOpen}
+        city={noProductionCity}
+        onLocate={onLocateNoProductionCity}
+        onClose={onCloseNoProductionPrompt}
       />
 
       <ListOverlay

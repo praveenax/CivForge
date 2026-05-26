@@ -35,7 +35,13 @@ export const processTurn = ({ players, cities, tiles }) => {
 
     return updatedCity;
   });
-  updatedCities = updatedCities.map((city) => processProductionQueue(city));
+  const citiesAfterProduction = [];
+  updatedCities.forEach((city) => {
+    const result = processProductionQueue(city, updatedTiles);
+    updatedTiles = result.tiles;
+    citiesAfterProduction.push(result.city);
+  });
+  updatedCities = citiesAfterProduction;
 
   const citiesByOwner = updatedCities.reduce((acc, city) => {
     if (!acc[city.owner]) {

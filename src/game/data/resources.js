@@ -7,6 +7,10 @@ export const RESOURCE_TYPES = {
     name: "Iron",
     yields: { food: 0, production: 1, gold: 0, science: 0 },
   },
+  stone: {
+    name: "Stone",
+    yields: { food: 0, production: 1, gold: 0, science: 0 },
+  },
   gems: {
     name: "Gems",
     yields: { food: 0, production: 0, gold: 2, science: 0 },
@@ -24,6 +28,7 @@ export const RESOURCE_POOL = [
   null,
   "wheat",
   "iron",
+  "stone",
   "gems",
   "manuscripts",
 ];

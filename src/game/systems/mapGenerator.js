@@ -16,6 +16,7 @@ export const generateMap = (width = 30, height = 30) => {
         y,
         terrain: pickRandom(TERRAIN_POOL),
         resource: pickRandom(RESOURCE_POOL),
+        improvement: null,
         owner: null,
         cityId: null,
       });

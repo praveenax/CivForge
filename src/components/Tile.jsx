@@ -3,8 +3,15 @@ import { TERRAIN_TYPES } from "../game/data/terrain";
 const resourceGlyph = {
   wheat: "W",
   iron: "I",
+  stone: "S",
   gems: "G",
   manuscripts: "M",
+};
+
+const improvementGlyph = {
+  mine: "MI",
+  farm: "FA",
+  archive: "AR",
 };
 
 const CIV_CLASS_BY_ID = {
@@ -44,6 +51,11 @@ function Tile({ tile, ownerCivilizationId, isSelected, hasCity, onClick }) {
       </span> */}
       {tile.resource ? (
         <span className="tile-resource">{resourceGlyph[tile.resource]}</span>
+      ) : null}
+      {tile.improvement ? (
+        <span className="tile-improvement">
+          {improvementGlyph[tile.improvement] ?? "IM"}
+        </span>
       ) : null}
       {hasCity ? (
         <span className="tile-city" aria-hidden="true">
