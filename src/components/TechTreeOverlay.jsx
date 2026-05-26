@@ -1,4 +1,9 @@
-import ReactFlow, { Background, Controls, MarkerType } from "reactflow";
+import ReactFlow, {
+  Background,
+  Controls,
+  MarkerType,
+  Position,
+} from "reactflow";
 import "reactflow/dist/style.css";
 import { TECHS, TECH_NODE_POSITIONS } from "../game/data/techs";
 
@@ -37,6 +42,8 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
     return {
       id: tech.id,
       position: TECH_NODE_POSITIONS[tech.id] ?? { x: 0, y: 0 },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       data: {
         label: (
           <button
@@ -63,8 +70,8 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
       target: tech.id,
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        width: 20,
-        height: 20,
+        width: 10,
+        height: 10,
         color: "#989da2",
       },
       style: { stroke: "#989da2", strokeWidth: 2 },
