@@ -24,7 +24,7 @@ function WorldGrid({
       <div
         className="world-grid"
         style={{
-          gridTemplateColumns: `repeat(${gridWidth}, minmax(26px, 1fr))`,
+          gridTemplateColumns: `repeat(${gridWidth}, minmax(80px, 1fr))`,
         }}
       >
         {tiles.map((tile) => {

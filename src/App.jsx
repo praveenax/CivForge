@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import CityOverlay from "./components/CityOverlay";
 import TechTreeOverlay from "./components/TechTreeOverlay";
 import TileInfoPanel from "./components/TileInfoPanel";
@@ -31,6 +32,35 @@ function App() {
     cities.find((city) => city.id === selectedCityId) ?? null;
   const selectedTile = tiles.find((tile) => tile.id === selectedTileId) ?? null;
   const researchProgress = getResearchProgress();
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key !== "Enter" || event.repeat) {
+        return;
+      }
+
+      const target = event.target;
+      const tagName = target?.tagName?.toLowerCase();
+      const isTypingField =
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        target?.isContentEditable;
+
+      if (isTypingField) {
+        return;
+      }
+
+      event.preventDefault();
+      endTurn();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [endTurn]);
 
   return (
     <div className="app-shell">

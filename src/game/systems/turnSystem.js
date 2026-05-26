@@ -2,6 +2,7 @@ import { processAiTurn } from "./aiSystem";
 import {
   calculateCityYields,
   claimTilesAroundCity,
+  getFoodConsumedPerTurn,
   processCityGrowth,
 } from "./citySystem";
 import { processProductionQueue } from "./productionSystem";
@@ -17,7 +18,6 @@ export const processTurn = ({ players, cities, tiles }) => {
     return {
       ...city,
       yields,
-      food: city.food + yields.food,
       goldStored: city.goldStored + yields.gold,
       scienceStored: city.scienceStored + yields.science,
     };
@@ -47,7 +47,11 @@ export const processTurn = ({ players, cities, tiles }) => {
     return {
       ...nextPlayer,
       stockpile: {
-        food: ownedCities.reduce((sum, city) => sum + city.yields.food, 0),
+        food: ownedCities.reduce(
+          (sum, city) =>
+            sum + (city.yields.food - getFoodConsumedPerTurn(city)),
+          0,
+        ),
         production: ownedCities.reduce(
           (sum, city) => sum + city.yields.production,
           0,

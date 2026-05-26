@@ -172,6 +172,8 @@ button:hover {
   text-align: left;
   position: relative;
   border-radius: 0px;
+  width: 80px;
+  height: 80px;
 }
 
 .tile.selected {
@@ -234,11 +236,12 @@ button:hover {
 
 .city-overlay {
   position: fixed;
-  left: 20px;
-  right: 20px;
-  bottom: 20px;
-  max-height: 46vh;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-height: none;
   overflow: auto;
+  border-radius: 0;
   z-index: 20;
 }
 
@@ -323,9 +326,9 @@ button:hover {
   }
 
   .city-overlay {
-    position: static;
-    max-height: none;
-    margin-top: 12px;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
   }
 
   .overlay-columns {

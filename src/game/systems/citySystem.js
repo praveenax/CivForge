@@ -74,19 +74,32 @@ export const calculateCityYields = (city, tiles) => {
   return yields;
 };
 
-export const processCityGrowth = (city) => {
-  const foodToGrow = 12 + (city.population - 1) * 6;
-  let population = city.population;
-  let storedFood = city.food;
+export const getFoodConsumedPerTurn = (city) => city.population * 2;
 
-  while (storedFood >= foodToGrow) {
-    storedFood -= foodToGrow;
+export const getFoodNeededForNextPopulation = (population) =>
+  5 * 2 ** Math.max(0, population - 1);
+
+export const processCityGrowth = (city) => {
+  let population = city.population;
+  let growthProgress = city.food;
+  const excessFood = Math.max(
+    0,
+    city.yields.food - getFoodConsumedPerTurn(city),
+  );
+
+  growthProgress += excessFood;
+
+  while (growthProgress >= getFoodNeededForNextPopulation(population)) {
+    growthProgress -= getFoodNeededForNextPopulation(population);
     population += 1;
   }
+
+  const foodNeededForNextPop = getFoodNeededForNextPopulation(population);
 
   return {
     ...city,
     population,
-    food: storedFood,
+    food: growthProgress,
+    foodNeededForNextPop,
   };
 };

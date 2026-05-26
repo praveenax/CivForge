@@ -1,5 +1,9 @@
 import { BUILDINGS } from "../game/data/buildings";
 import { UNITS } from "../game/data/units";
+import {
+  getFoodConsumedPerTurn,
+  getFoodNeededForNextPopulation,
+} from "../game/systems/citySystem";
 
 function QueueItem({ item }) {
   const source = item.type === "building" ? BUILDINGS : UNITS;
@@ -42,6 +46,16 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
     return player?.unlockedTechs.includes(unit.requiredTech);
   });
 
+  const foodConsumed = getFoodConsumedPerTurn(city);
+  const netFood = city.yields.food - foodConsumed;
+  const foodNeededForNextPop =
+    city.foodNeededForNextPop ??
+    getFoodNeededForNextPopulation(city.population);
+  const growthProgressPct = Math.min(
+    100,
+    Math.round((city.food / foodNeededForNextPop) * 100),
+  );
+
   return (
     <aside className="panel city-overlay">
       <div className="panel-header">
@@ -55,7 +69,14 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
         <section>
           <h3>City Stats</h3>
           <p>Population: {city.population}</p>
-          <p>Food Storage: {city.food}</p>
+          <p>Food Consumption: {foodConsumed}/turn</p>
+          <p>Net Food: {netFood >= 0 ? `+${netFood}` : netFood}/turn</p>
+          <p>
+            Growth Progress: {city.food}/{foodNeededForNextPop} (
+            {growthProgressPct}
+            %)
+          </p>
+          <progress value={city.food} max={foodNeededForNextPop} />
           <p>
             Buildings:{" "}
             {city.buildings.length ? city.buildings.join(", ") : "None"}
