@@ -131,6 +131,7 @@ function WorldGrid({
       <Minimap
         tiles={tiles}
         cities={cities}
+        players={players}
         selectedTileId={selectedTileId}
         gridWidth={gridWidth}
         gridHeight={gridHeight}

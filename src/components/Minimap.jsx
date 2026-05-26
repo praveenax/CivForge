@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const MINIMAP_CELL_SIZE = 4;
 const MINIMAP_LAND_COLOR = "#2ea043";
@@ -13,9 +13,21 @@ const WATER_TERRAINS = new Set([
   "sea",
 ]);
 
+const CIV_BORDER_COLORS = {
+  rome: "#d64444",
+  india: "#df8b36",
+  egypt: "#c6a337",
+  greece: "#467cd6",
+  china: "#2ca880",
+  persia: "#9460c3",
+  aztec: "#329b82",
+  neutral: "#b5bdc2",
+};
+
 function Minimap({
   tiles,
   cities,
+  players,
   selectedTileId,
   gridWidth,
   gridHeight,
@@ -25,6 +37,14 @@ function Minimap({
   onJumpTo,
 }) {
   const canvasRef = useRef(null);
+
+  const ownerCivilizationLookup = useMemo(() => {
+    const map = new Map();
+    players.forEach((player) => {
+      map.set(player.id, player.civilizationId ?? "neutral");
+    });
+    return map;
+  }, [players]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -46,6 +66,23 @@ function Minimap({
       context.fillStyle = WATER_TERRAINS.has(tile.terrain)
         ? MINIMAP_WATER_COLOR
         : MINIMAP_LAND_COLOR;
+      context.fillRect(
+        tile.x * MINIMAP_CELL_SIZE,
+        tile.y * MINIMAP_CELL_SIZE,
+        MINIMAP_CELL_SIZE,
+        MINIMAP_CELL_SIZE,
+      );
+    });
+
+    tiles.forEach((tile) => {
+      if (!tile.owner) {
+        return;
+      }
+
+      const civilizationId =
+        ownerCivilizationLookup.get(tile.owner) ?? "neutral";
+      context.fillStyle =
+        CIV_BORDER_COLORS[civilizationId] ?? CIV_BORDER_COLORS.neutral;
       context.fillRect(
         tile.x * MINIMAP_CELL_SIZE,
         tile.y * MINIMAP_CELL_SIZE,
@@ -100,6 +137,7 @@ function Minimap({
     viewport,
     worldPixelHeight,
     worldPixelWidth,
+    ownerCivilizationLookup,
   ]);
 
   const handleClick = (event) => {
