@@ -1,9 +1,22 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBookOpen,
+  faCoins,
+  faDrumstickBite,
+  faHammer,
+  faLandmark,
+  faMasksTheater,
+  faHourglassHalf,
+} from "@fortawesome/free-solid-svg-icons";
 import TurnButton from "./TurnButton";
 
-function StatCard({ label, value }) {
+function StatCard({ icon, label, value }) {
   return (
     <div className="stat-card">
-      <span>{label}</span>
+      <span className="stat-card-label">
+        {icon ? <FontAwesomeIcon icon={icon} /> : null}
+        <span>{label}</span>
+      </span>
       <strong>{value}</strong>
     </div>
   );
@@ -25,16 +38,37 @@ function TopBar({
       </div> */}
 
       <div className="stats-row">
-        <h3>CivForge</h3>
+        <h3 className="game-title">
+          <FontAwesomeIcon icon={faLandmark} />
+          <span>CivForge</span>
+        </h3>
         <div className="stats-row-prod">
-          <StatCard label="Turn" value={turn} />
-          <StatCard label="Food" value={player?.stockpile.food ?? 0} />
+          <StatCard icon={faHourglassHalf} label="Turn" value={turn} />
           <StatCard
+            icon={faDrumstickBite}
+            label="Food"
+            value={player?.stockpile.food ?? 0}
+          />
+          <StatCard
+            icon={faHammer}
             label="Production"
             value={player?.stockpile.production ?? 0}
           />
-          <StatCard label="Gold" value={player?.stockpile.gold ?? 0} />
-          <StatCard label="Science" value={player?.stockpile.science ?? 0} />
+          <StatCard
+            icon={faCoins}
+            label="Gold"
+            value={player?.stockpile.gold ?? 0}
+          />
+          <StatCard
+            icon={faBookOpen}
+            label="Science"
+            value={player?.stockpile.science ?? 0}
+          />
+          <StatCard
+            icon={faMasksTheater}
+            label="Culture"
+            value={player?.stockpile.culture ?? 0}
+          />
         </div>
 
         <div className="top-actions">

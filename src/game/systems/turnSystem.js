@@ -2,7 +2,9 @@ import { processAiTurn } from "./aiSystem";
 import {
   calculateCityYields,
   claimTilesAroundCity,
+  expandCityBorder,
   getFoodConsumedPerTurn,
+  processCityCulture,
   processCityGrowth,
 } from "./citySystem";
 import { processProductionQueue } from "./productionSystem";
@@ -24,6 +26,15 @@ export const processTurn = ({ players, cities, tiles }) => {
   });
 
   updatedCities = updatedCities.map((city) => processCityGrowth(city));
+  updatedCities = updatedCities.map((city) => {
+    const { city: updatedCity, borderGrowth } = processCityCulture(city);
+
+    if (borderGrowth > 0) {
+      updatedTiles = expandCityBorder(updatedTiles, updatedCity, borderGrowth);
+    }
+
+    return updatedCity;
+  });
   updatedCities = updatedCities.map((city) => processProductionQueue(city));
 
   const citiesByOwner = updatedCities.reduce((acc, city) => {
@@ -58,6 +69,10 @@ export const processTurn = ({ players, cities, tiles }) => {
         ),
         gold: ownedCities.reduce((sum, city) => sum + city.yields.gold, 0),
         science: sciencePerTurn,
+        culture: ownedCities.reduce(
+          (sum, city) => sum + city.yields.culture,
+          0,
+        ),
       },
     };
   });

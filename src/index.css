@@ -89,6 +89,13 @@ button:hover {
   flex-wrap: wrap;
 }
 
+.game-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
 .stats-row-prod {
   display: flex;
   flex-direction: row;
@@ -103,6 +110,12 @@ button:hover {
   padding: 8px;
   display: grid;
   gap: 3px;
+}
+
+.stat-card-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .stat-card span {

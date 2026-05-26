@@ -18,6 +18,9 @@ const getInitialCities = () => [
     population: 2,
     food: 0,
     foodNeededForNextPop: 10,
+    culture: 0,
+    cultureLevel: 1,
+    cultureNeededForNextLevel: 10,
     goldStored: 0,
     scienceStored: 0,
     buildings: ["granary"],
@@ -28,6 +31,7 @@ const getInitialCities = () => [
       production: 3,
       gold: 2,
       science: 1,
+      culture: 1,
     },
   },
   {
@@ -39,6 +43,9 @@ const getInitialCities = () => [
     population: 2,
     food: 0,
     foodNeededForNextPop: 10,
+    culture: 0,
+    cultureLevel: 1,
+    cultureNeededForNextLevel: 10,
     goldStored: 0,
     scienceStored: 0,
     buildings: [],
@@ -49,6 +56,7 @@ const getInitialCities = () => [
       production: 2,
       gold: 1,
       science: 1,
+      culture: 1,
     },
   },
 ];
@@ -61,7 +69,7 @@ const getInitialPlayers = () => [
     unlockedTechs: ["agriculture"],
     currentResearch: "mining",
     scienceProgress: 0,
-    stockpile: { food: 0, production: 0, gold: 0, science: 0 },
+    stockpile: { food: 0, production: 0, gold: 0, science: 0, culture: 0 },
   },
   {
     id: "ai_1",
@@ -70,7 +78,7 @@ const getInitialPlayers = () => [
     unlockedTechs: ["agriculture"],
     currentResearch: "mining",
     scienceProgress: 0,
-    stockpile: { food: 0, production: 0, gold: 0, science: 0 },
+    stockpile: { food: 0, production: 0, gold: 0, science: 0, culture: 0 },
   },
 ];
 

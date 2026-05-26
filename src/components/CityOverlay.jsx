@@ -1,6 +1,7 @@
 import { BUILDINGS } from "../game/data/buildings";
 import { UNITS } from "../game/data/units";
 import {
+  getCultureNeededForNextLevel,
   getFoodConsumedPerTurn,
   getFoodNeededForNextPopulation,
 } from "../game/systems/citySystem";
@@ -55,6 +56,13 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
     100,
     Math.round((city.food / foodNeededForNextPop) * 100),
   );
+  const cultureNeededForNextLevel =
+    city.cultureNeededForNextLevel ??
+    getCultureNeededForNextLevel(city.cultureLevel ?? 1);
+  const cultureProgressPct = Math.min(
+    100,
+    Math.round(((city.culture ?? 0) / cultureNeededForNextLevel) * 100),
+  );
 
   return (
     <aside className="panel city-overlay">
@@ -69,6 +77,7 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
         <section>
           <h3>City Stats</h3>
           <p>Population: {city.population}</p>
+          <p>Culture Level: {city.cultureLevel ?? 1}</p>
           <p>Food Consumption: {foodConsumed}/turn</p>
           <p>Net Food: {netFood >= 0 ? `+${netFood}` : netFood}/turn</p>
           <p>
@@ -77,6 +86,12 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
             %)
           </p>
           <progress value={city.food} max={foodNeededForNextPop} />
+          <p>
+            Culture Progress: {city.culture ?? 0}/{cultureNeededForNextLevel} (
+            {cultureProgressPct}
+            %)
+          </p>
+          <progress value={city.culture ?? 0} max={cultureNeededForNextLevel} />
           <p>
             Buildings:{" "}
             {city.buildings.length ? city.buildings.join(", ") : "None"}
@@ -90,6 +105,7 @@ function CityOverlay({ city, player, onClose, onQueueProduction }) {
           <p>Production: {city.yields.production}</p>
           <p>Gold: {city.yields.gold}</p>
           <p>Science: {city.yields.science}</p>
+          <p>Culture: {city.yields.culture}</p>
         </section>
       </div>
 
