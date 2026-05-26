@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
+import { TECHS } from "../game/data/techs";
 
 const LIST_TABS = {
   CITIES: "cities",
   RESOURCES: "resources",
   UNITS: "units",
+  SCORE: "score",
 };
 
 const getCurrentQueueItem = (city, type) =>
@@ -74,6 +76,60 @@ function ListOverlay({
     [playerCities, playerNameById],
   );
 
+  const scoreRows = useMemo(() => {
+    const cityStatsByOwner = new Map();
+    const claimedTilesByOwner = new Map();
+
+    cities.forEach((city) => {
+      const current = cityStatsByOwner.get(city.owner) ?? {
+        units: 0,
+        buildings: 0,
+      };
+
+      current.units += city.units?.length ?? 0;
+      current.buildings += city.buildings?.length ?? 0;
+      cityStatsByOwner.set(city.owner, current);
+    });
+
+    tiles.forEach((tile) => {
+      if (!tile.owner) {
+        return;
+      }
+
+      claimedTilesByOwner.set(
+        tile.owner,
+        (claimedTilesByOwner.get(tile.owner) ?? 0) + 1,
+      );
+    });
+
+    return players
+      .map((player) => {
+        const cityStats = cityStatsByOwner.get(player.id) ?? {
+          units: 0,
+          buildings: 0,
+        };
+        const tileCount = claimedTilesByOwner.get(player.id) ?? 0;
+        const unlockedTechValue = (player.unlockedTechs ?? []).reduce(
+          (total, techId) => total + (TECHS[techId]?.cost ?? 0),
+          0,
+        );
+        const researchValue = unlockedTechValue + (player.scienceProgress ?? 0);
+        const totalScore =
+          tileCount + cityStats.units + cityStats.buildings + researchValue;
+
+        return {
+          playerId: player.id,
+          playerName: player.name,
+          tileCount,
+          unitCount: cityStats.units,
+          buildingCount: cityStats.buildings,
+          researchValue,
+          totalScore,
+        };
+      })
+      .sort((left, right) => right.totalScore - left.totalScore);
+  }, [cities, players, tiles]);
+
   if (!isOpen) {
     return null;
   }
@@ -120,6 +176,15 @@ function ListOverlay({
           >
             Show Units
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === LIST_TABS.SCORE}
+            className={activeTab === LIST_TABS.SCORE ? "active" : ""}
+            onClick={() => setActiveTab(LIST_TABS.SCORE)}
+          >
+            Score
+          </button>
         </div>
 
         <div className="list-tab-content">
@@ -134,7 +199,9 @@ function ListOverlay({
                       {city.population}
                     </div>
                     <div>
-                      Building: {getCurrentQueueItem(city, "building")?.id ?? "None"} - Unit: {getCurrentQueueItem(city, "unit")?.id ?? "None"}
+                      Building:{" "}
+                      {getCurrentQueueItem(city, "building")?.id ?? "None"} -
+                      Unit: {getCurrentQueueItem(city, "unit")?.id ?? "None"}
                     </div>
                     <button
                       type="button"
@@ -182,6 +249,22 @@ function ListOverlay({
               <p className="list-overlay-empty">
                 No units available right now.
               </p>
+            )
+          ) : null}
+
+          {activeTab === LIST_TABS.SCORE ? (
+            scoreRows.length > 0 ? (
+              <ul className="list-overlay-items">
+                {scoreRows.map((row) => (
+                  <li key={row.playerId}>
+                    <strong>{row.playerName}</strong>: {row.totalScore} - Tiles:{" "}
+                    {row.tileCount} - Units: {row.unitCount} - Buildings:{" "}
+                    {row.buildingCount} - Research: {row.researchValue}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="list-overlay-empty">No score data available.</p>
             )
           ) : null}
         </div>
