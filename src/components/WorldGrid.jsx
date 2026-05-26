@@ -1,9 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TERRAIN_TYPES } from "../game/data/terrain";
 import Tile from "./Tile";
 
 const TILE_SIZE = 80;
 const MINIMAP_CELL_SIZE = 4;
+const MINIMAP_LAND_COLOR = "#2ea043";
+const MINIMAP_WATER_COLOR = "#2f81f7";
+const MINIMAP_CITY_COLOR = "#111111";
+const WATER_TERRAINS = new Set([
+  "river",
+  "water",
+  "ocean",
+  "coast",
+  "lake",
+  "sea",
+]);
 
 function WorldGrid({
   tiles,
@@ -83,8 +93,9 @@ function WorldGrid({
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     tiles.forEach((tile) => {
-      const terrain = TERRAIN_TYPES[tile.terrain];
-      context.fillStyle = terrain?.color ?? "#273035";
+      context.fillStyle = WATER_TERRAINS.has(tile.terrain)
+        ? MINIMAP_WATER_COLOR
+        : MINIMAP_LAND_COLOR;
       context.fillRect(
         tile.x * MINIMAP_CELL_SIZE,
         tile.y * MINIMAP_CELL_SIZE,
@@ -94,7 +105,7 @@ function WorldGrid({
     });
 
     cities.forEach((city) => {
-      context.fillStyle = "#f6f6ef";
+      context.fillStyle = MINIMAP_CITY_COLOR;
       context.fillRect(
         city.x * MINIMAP_CELL_SIZE,
         city.y * MINIMAP_CELL_SIZE,
