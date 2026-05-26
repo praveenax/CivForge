@@ -30,6 +30,11 @@ function TopBar({
   onReset,
   onEndTurn,
 }) {
+  const progressPct = Math.max(
+    0,
+    Math.min(100, researchProgress?.progressPct ?? 0),
+  );
+
   return (
     <header className="top-bar">
       {/* <div className="brand">
@@ -70,6 +75,24 @@ function TopBar({
             value={player?.stockpile.culture ?? 0}
           />
         </div>
+        <div className="research-line">
+          {researchProgress.currentTech
+            ? `Researching ${researchProgress.currentTech.name}: ${progressPct}%`
+            : "No active research"}
+        </div>
+        <div
+          className="research-progress"
+          role="progressbar"
+          aria-label="Research progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPct}
+        >
+          <div
+            className="research-progress-fill"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
 
         <div className="top-actions">
           <button type="button" onClick={onToggleTechTree}>
@@ -80,12 +103,6 @@ function TopBar({
           </button>
           <TurnButton onEndTurn={onEndTurn} />
         </div>
-      </div>
-
-      <div className="research-line">
-        {researchProgress.currentTech
-          ? `Researching ${researchProgress.currentTech.name}: ${researchProgress.progressPct}%`
-          : "No active research"}
       </div>
     </header>
   );
