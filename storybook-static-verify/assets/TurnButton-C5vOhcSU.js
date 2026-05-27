@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-xPQekRTU.js";import{t}from"./jsx-runtime-BNO8td4Y.js";function n({onEndTurn:e}){return(0,r.jsx)(`button`,{type:`button`,className:`turn-button`,onClick:e,children:`End Turn`})}var r,i=e((()=>{r=t(),n.__docgenInfo={description:``,methods:[],displayName:`TurnButton`}}));export{i as n,n as t};
