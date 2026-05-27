@@ -12,38 +12,14 @@ import {
   getFoodConsumedPerTurn,
   getFoodNeededForNextPopulation,
 } from "../game/systems/citySystem";
+import CityDetailsPanel from "./cityOverlay/CityDetailsPanel";
+import CityOverviewKpis from "./cityOverlay/CityOverviewKpis";
+import CityProductionActions from "./cityOverlay/CityProductionActions";
+import CityProductionQueue from "./cityOverlay/CityProductionQueue";
+import CityYieldsPanel from "./cityOverlay/CityYieldsPanel";
+import SettlementTilePicker from "./cityOverlay/SettlementTilePicker";
 
 const getEntryLabel = (registry, id) => registry[id]?.name ?? id;
-
-function QueueItem({ item, tileLabelById }) {
-  const source =
-    item.type === "building"
-      ? BUILDINGS
-      : item.type === "unit"
-        ? UNITS
-        : IMPROVEMENTS;
-  const config = source[item.id];
-  const cost = config?.cost ?? 0;
-  const progress =
-    cost > 0 ? Math.min(100, Math.round((item.progress / cost) * 100)) : 0;
-  const tileLabel = item.tileId ? tileLabelById.get(item.tileId) : null;
-
-  return (
-    <li className="queue-item">
-      <div>
-        <strong>{config?.name ?? item.id}</strong>
-        <p className="queue-item-meta">
-          {item.type}
-          {tileLabel ? ` - ${tileLabel}` : ""}
-        </p>
-      </div>
-      <div className="queue-item-progress">
-        <strong>{progress}%</strong>
-        <progress value={item.progress} max={cost || 1} />
-      </div>
-    </li>
-  );
-}
 
 function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
   const [isSettlementPickerOpen, setIsSettlementPickerOpen] = useState(false);
@@ -176,247 +152,49 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
           </button>
         </div>
 
-        <section className="city-kpi-grid" aria-label="City overview">
-          <article className="city-kpi-card">
-            <span>Population</span>
-            <strong>{city.population}</strong>
-          </article>
-          <article className="city-kpi-card">
-            <span>Culture Level</span>
-            <strong>{city.cultureLevel ?? 1}</strong>
-          </article>
-          <article className="city-kpi-card">
-            <span>Food/Turn</span>
-            <strong>{netFood >= 0 ? `+${netFood}` : netFood}</strong>
-          </article>
-          <article className="city-kpi-card">
-            <span>Consumption</span>
-            <strong>{foodConsumed}/turn</strong>
-          </article>
-        </section>
+        <CityOverviewKpis
+          population={city.population}
+          cultureLevel={city.cultureLevel ?? 1}
+          netFood={netFood}
+          foodConsumed={foodConsumed}
+        />
 
         <div className="overlay-columns city-overlay-columns">
-          <section className="city-info-card">
-            <h3>Growth & Culture</h3>
-            <div className="city-progress-group">
-              <div className="city-progress-row">
-                <span>Growth</span>
-                <strong>
-                  {city.food}/{foodNeededForNextPop} ({growthProgressPct}%)
-                </strong>
-              </div>
-              <progress value={city.food} max={foodNeededForNextPop} />
-            </div>
-            <div className="city-progress-group">
-              <div className="city-progress-row">
-                <span>Culture</span>
-                <strong>
-                  {city.culture ?? 0}/{cultureNeededForNextLevel} (
-                  {cultureProgressPct}%)
-                </strong>
-              </div>
-              <progress
-                value={city.culture ?? 0}
-                max={cultureNeededForNextLevel}
-              />
-            </div>
-            <div className="city-tag-block">
-              <span>Buildings</span>
-              <p>{buildingNames.length ? buildingNames.join(", ") : "None"}</p>
-            </div>
-            <div className="city-tag-block">
-              <span>Units</span>
-              <p>{unitNames.length ? unitNames.join(", ") : "None"}</p>
-            </div>
-            <div className="city-tag-block">
-              <span>Improvements</span>
-              <p>
-                {improvementNames.length ? improvementNames.join(", ") : "None"}
-              </p>
-            </div>
-          </section>
+          <CityDetailsPanel
+            city={city}
+            foodNeededForNextPop={foodNeededForNextPop}
+            growthProgressPct={growthProgressPct}
+            cultureNeededForNextLevel={cultureNeededForNextLevel}
+            cultureProgressPct={cultureProgressPct}
+            buildingNames={buildingNames}
+            unitNames={unitNames}
+            improvementNames={improvementNames}
+          />
 
-          <section className="city-info-card">
-            <h3>Yield Per Turn</h3>
-            <ul className="city-yield-list">
-              <li>
-                <span>Food</span>
-                <strong>{city.yields.food}</strong>
-              </li>
-              <li>
-                <span>Production</span>
-                <strong>{city.yields.production}</strong>
-              </li>
-              <li>
-                <span>Gold</span>
-                <strong>{city.yields.gold}</strong>
-              </li>
-              <li>
-                <span>Science</span>
-                <strong>{city.yields.science}</strong>
-              </li>
-              <li>
-                <span>Culture</span>
-                <strong>{city.yields.culture}</strong>
-              </li>
-            </ul>
-          </section>
+          <CityYieldsPanel yields={city.yields} />
         </div>
 
-        <section>
-          <h3>Production Queue</h3>
-          {city.queue.length ? (
-            <ul className="queue-list">
-              {city.queue.map((item, index) => (
-                <QueueItem
-                  key={`${item.type}-${item.id}-${index}`}
-                  item={item}
-                  tileLabelById={tileLabelById}
-                />
-              ))}
-            </ul>
-          ) : (
-            <p className="city-empty-text">Queue is empty.</p>
-          )}
-        </section>
+        <CityProductionQueue queue={city.queue} tileLabelById={tileLabelById} />
 
-        <div className="overlay-columns city-actions-columns">
-          <section className="city-info-card">
-            <h3>Add Building</h3>
-            <div className="action-grid">
-              {availableBuildings.map((building) => (
-                <button
-                  key={building.id}
-                  type="button"
-                  onClick={() =>
-                    onQueueProduction(city.id, "building", building.id)
-                  }
-                >
-                  {building.name} ({building.cost})
-                </button>
-              ))}
-            </div>
-            {!availableBuildings.length ? (
-              <p className="city-empty-text">No new buildings available.</p>
-            ) : null}
-          </section>
-
-          <section className="city-info-card">
-            <h3>Add Improvement</h3>
-            <div className="action-grid">
-              {settlementImprovement ? (
-                <button
-                  type="button"
-                  onClick={() => setIsSettlementPickerOpen(true)}
-                  disabled={
-                    !isSettlementUnlocked || !validSettlementTiles.length
-                  }
-                >
-                  {settlementImprovement.name} ({settlementImprovement.cost}) -
-                  Choose Tile
-                </button>
-              ) : null}
-              {availableImprovements.map((entry) => {
-                const resourceName =
-                  RESOURCE_TYPES[entry.resourceId]?.name ?? entry.resourceId;
-                return (
-                  <button
-                    key={`${entry.tileId}-${entry.improvement.id}`}
-                    type="button"
-                    onClick={() =>
-                      onQueueProduction(
-                        city.id,
-                        "improvement",
-                        entry.improvement.id,
-                        {
-                          tileId: entry.tileId,
-                        },
-                      )
-                    }
-                  >
-                    {entry.improvement.name} ({entry.improvement.cost}) -{" "}
-                    {resourceName} {entry.x},{entry.y}
-                  </button>
-                );
-              })}
-            </div>
-            {!isSettlementUnlocked && settlementImprovement ? (
-              <p className="city-empty-text">
-                Settlement requires {settlementImprovement.requiredTech}.
-              </p>
-            ) : null}
-            {!validSettlementTiles.length && settlementImprovement ? (
-              <p className="city-empty-text">
-                No valid settlement tile adjacent to your cultural border.
-              </p>
-            ) : null}
-            {!availableImprovements.length && !settlementImprovement ? (
-              <p className="city-empty-text">
-                No valid resource improvements available.
-              </p>
-            ) : null}
-            {!availableImprovements.length && settlementImprovement ? (
-              <p className="city-empty-text">
-                No valid resource improvements available.
-              </p>
-            ) : null}
-          </section>
-
-          <section className="city-info-card">
-            <h3>Train Unit</h3>
-            <div className="action-grid">
-              {availableUnits.map((unit) => (
-                <button
-                  key={unit.id}
-                  type="button"
-                  onClick={() => onQueueProduction(city.id, "unit", unit.id)}
-                >
-                  {unit.name} ({unit.cost})
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
+        <CityProductionActions
+          cityId={city.id}
+          availableBuildings={availableBuildings}
+          availableUnits={availableUnits}
+          availableImprovements={availableImprovements}
+          settlementImprovement={settlementImprovement}
+          isSettlementUnlocked={isSettlementUnlocked}
+          validSettlementTiles={validSettlementTiles}
+          onOpenSettlementPicker={() => setIsSettlementPickerOpen(true)}
+          onQueueProduction={onQueueProduction}
+        />
       </div>
 
-      {isSettlementPickerOpen ? (
-        <section
-          className="city-tile-picker-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="settlement-tile-picker-title"
-        >
-          <div className="city-tile-picker-card panel">
-            <h3 id="settlement-tile-picker-title">Choose Settlement Tile</h3>
-            <p>
-              Select a tile next to a culturally owned tile to place your
-              settlement.
-            </p>
-            <div className="city-tile-picker-grid">
-              {validSettlementTiles.map((tile) => (
-                <button
-                  key={tile.id}
-                  type="button"
-                  onClick={() => handleQueueSettlement(tile.id)}
-                >
-                  Tile {tile.x},{tile.y}
-                  {tile.resource
-                    ? ` - ${RESOURCE_TYPES[tile.resource]?.name ?? tile.resource}`
-                    : ""}
-                </button>
-              ))}
-            </div>
-            <div className="research-prompt-actions">
-              <button
-                type="button"
-                onClick={() => setIsSettlementPickerOpen(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <SettlementTilePicker
+        isOpen={isSettlementPickerOpen}
+        validSettlementTiles={validSettlementTiles}
+        onSelectTile={handleQueueSettlement}
+        onClose={() => setIsSettlementPickerOpen(false)}
+      />
     </aside>
   );
 }
