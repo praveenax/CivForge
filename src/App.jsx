@@ -9,6 +9,7 @@ import {
   GAME_SAVE_KEY,
   useGameStore,
 } from "./game/store/gameStore";
+import { getValidSettlementTiles } from "./game/data/improvements";
 import {
   GAME_SCREENS,
   setListOverlayOpen,
@@ -62,6 +63,9 @@ function App() {
   const selectTile = useGameStore((state) => state.selectTile);
   const queueProduction = useGameStore((state) => state.queueProduction);
   const setResearch = useGameStore((state) => state.setResearch);
+  const setResearchForPlayer = useGameStore(
+    (state) => state.setResearchForPlayer,
+  );
   const toggleTechTree = useGameStore((state) => state.toggleTechTree);
   const endTurn = useGameStore((state) => state.endTurn);
   const completeCityFounding = useGameStore(
@@ -80,6 +84,9 @@ function App() {
   const player = players.find((entry) => entry.id === "player1") ?? null;
   const selectedCity =
     cities.find((city) => city.id === selectedCityId) ?? null;
+  const validSettlementTileIds = selectedCity
+    ? getValidSettlementTiles(selectedCity, tiles).map((tile) => tile.id)
+    : [];
   const noProductionCity =
     cities.find((city) => city.id === noProductionCityId) ?? null;
   const selectedTile = tiles.find((tile) => tile.id === selectedTileId) ?? null;
@@ -411,6 +418,7 @@ function App() {
       tiles={tiles}
       cities={cities}
       players={players}
+      highlightedTileIds={validSettlementTileIds}
       locateRequest={locateRequest}
       selectedTileId={selectedTileId}
       onSelectTile={selectTile}
@@ -421,6 +429,7 @@ function App() {
       onQueueProduction={queueProduction}
       isTechTreeOpen={isTechTreeOpen}
       onSetResearch={setResearch}
+      onSetResearchForPlayer={setResearchForPlayer}
       isResearchPromptOpen={isResearchPromptOpen}
       onCloseResearchPrompt={() => dispatch(setResearchPromptOpen(false))}
       isNoProductionPromptOpen={isNoProductionPromptOpen}

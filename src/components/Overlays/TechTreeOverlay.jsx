@@ -32,15 +32,31 @@ const getNodeStyle = (status) => {
   };
 };
 
-function TechTreeOverlay({ player, onClose, onSelectTech }) {
+function TechTreeOverlay({
+  player,
+  players = [],
+  onClose,
+  onSelectTech,
+  onSelectTechForPlayer,
+}) {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState(
+    player?.id ?? players[0]?.id ?? null,
+  );
+
+  const activePlayer =
+    players.find((entry) => entry.id === selectedPlayerId) ??
+    player ??
+    players[0] ??
+    null;
+  const isHumanPlayer = activePlayer?.type === "human";
 
   const nodes = useMemo(
     () =>
       Object.values(TECHS).map((tech) => {
-        const status = player.unlockedTechs.includes(tech.id)
+        const status = activePlayer?.unlockedTechs.includes(tech.id)
           ? "unlocked"
-          : player.currentResearch === tech.id
+          : activePlayer?.currentResearch === tech.id
             ? "researching"
             : "locked";
 
@@ -54,8 +70,19 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
               <button
                 type="button"
                 className="tech-node-button"
-                disabled={status === "unlocked"}
-                onClick={() => onSelectTech(tech.id)}
+                disabled={status === "unlocked" || !isHumanPlayer}
+                onClick={() => {
+                  if (!activePlayer) {
+                    return;
+                  }
+
+                  if (onSelectTechForPlayer) {
+                    onSelectTechForPlayer(activePlayer.id, tech.id);
+                    return;
+                  }
+
+                  onSelectTech(tech.id);
+                }}
               >
                 <strong>{tech.name}</strong>
                 <span>Cost: {tech.cost}</span>
@@ -67,7 +94,7 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
           draggable: false,
         };
       }),
-    [onSelectTech, player.currentResearch, player.unlockedTechs],
+    [activePlayer, isHumanPlayer, onSelectTech, onSelectTechForPlayer],
   );
 
   const edges = useMemo(
@@ -103,8 +130,8 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
     );
 
     const fallbackTech =
-      player.currentResearch ||
-      player.unlockedTechs
+      activePlayer?.currentResearch ||
+      (activePlayer?.unlockedTechs ?? [])
         .map((techId) => ({
           id: techId,
           x: TECH_NODE_POSITIONS[techId]?.x ?? -1,
@@ -140,16 +167,47 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
       minZoom: 0.8,
       maxZoom: 1.35,
     });
-  }, [nodes, player.currentResearch, player.unlockedTechs, reactFlowInstance]);
+  }, [
+    activePlayer?.currentResearch,
+    activePlayer?.unlockedTechs,
+    nodes,
+    reactFlowInstance,
+  ]);
 
   return (
     <section className="tech-overlay">
       <div className="panel-header">
         <h2>Science Tree</h2>
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
+        <div className="tech-overlay-header-actions">
+          {players.length > 1 ? (
+            <label className="tech-player-picker" htmlFor="tech-tree-player">
+              <span>Player</span>
+              <select
+                id="tech-tree-player"
+                value={activePlayer?.id ?? ""}
+                onChange={(event) => setSelectedPlayerId(event.target.value)}
+              >
+                {players.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <button type="button" onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
+      <p className="tech-player-caption">
+        {activePlayer?.name ?? "Player"} science progression
+      </p>
+      {!isHumanPlayer ? (
+        <p className="tech-player-hint">
+          AI civilizations manage their own research automatically.
+        </p>
+      ) : null}
       <div className="tech-flow-shell">
         <ReactFlow
           nodes={nodes}

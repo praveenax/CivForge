@@ -23,13 +23,21 @@ const CIV_CLASS_BY_ID = {
   aztec: "owner-civ-aztec",
 };
 
-function Tile({ tile, ownerCivilizationId, isSelected, hasCity, onClick }) {
+function Tile({
+  tile,
+  ownerCivilizationId,
+  isSelected,
+  hasCity,
+  isSettlementCandidate,
+  onClick,
+}) {
   const terrain = TERRAIN_TYPES[tile.terrain];
   const civClassName =
     CIV_CLASS_BY_ID[ownerCivilizationId ?? ""] ?? "owner-civ-neutral";
   const tileClassName = [
     "tile",
     isSelected ? "selected" : "",
+    isSettlementCandidate ? "settlement-candidate" : "",
     hasCity ? "city" : "",
     tile.owner ? "owned-tile" : "",
     tile.owner ? civClassName : "",
@@ -67,6 +75,11 @@ function Tile({ tile, ownerCivilizationId, isSelected, hasCity, onClick }) {
           >
             <path d="M2 14h12v-1H2v1zM4 13h2V8H4v5zm3 0h2V5H7v8zm3 0h2V9h-2v4zm-6-6h8V3H4v4z" />
           </svg>
+        </span>
+      ) : null}
+      {isSettlementCandidate ? (
+        <span className="tile-settlement-marker" aria-hidden="true">
+          +
         </span>
       ) : null}
     </button>

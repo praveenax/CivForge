@@ -8,6 +8,7 @@ function WorldGrid({
   tiles,
   cities,
   players,
+  highlightedTileIds = [],
   locateRequest,
   selectedTileId,
   onSelectTile,
@@ -145,6 +146,7 @@ function WorldGrid({
                   tile.owner ? ownerCivilizationLookup.get(tile.owner) : null
                 }
                 isSelected={selectedTileId === tile.id}
+                isSettlementCandidate={highlightedTileIds.includes(tile.id)}
                 hasCity={Boolean(city)}
                 onClick={() => {
                   onSelectTile(tile.id);

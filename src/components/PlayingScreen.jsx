@@ -30,6 +30,7 @@ function PlayingScreen({
   onQueueProduction,
   isTechTreeOpen,
   onSetResearch,
+  onSetResearchForPlayer,
   isResearchPromptOpen,
   onCloseResearchPrompt,
   isNoProductionPromptOpen,
@@ -84,8 +85,10 @@ function PlayingScreen({
       {isTechTreeOpen && player ? (
         <TechTreeOverlay
           player={player}
+          players={players}
           onClose={onToggleTechTree}
           onSelectTech={onSetResearch}
+          onSelectTechForPlayer={onSetResearchForPlayer}
         />
       ) : null}
 

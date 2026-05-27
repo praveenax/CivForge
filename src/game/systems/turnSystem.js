@@ -10,6 +10,29 @@ import {
 import { processProductionQueue } from "./productionSystem";
 import { processScience } from "./scienceSystem";
 
+const assignDefaultAiResearch = (player) => {
+  if (player.type !== "ai" || player.currentResearch) {
+    return player;
+  }
+
+  const defaultPick = [
+    "agriculture",
+    "mining",
+    "writing",
+    "bronzeWorking",
+  ].find((techId) => !player.unlockedTechs.includes(techId));
+
+  if (!defaultPick) {
+    return player;
+  }
+
+  return {
+    ...player,
+    currentResearch: defaultPick,
+    scienceProgress: 0,
+  };
+};
+
 export const processTurn = ({ players, cities, tiles }) => {
   let updatedTiles = [...tiles];
   const completedSettlements = [];
@@ -36,16 +59,6 @@ export const processTurn = ({ players, cities, tiles }) => {
 
     return updatedCity;
   });
-  const citiesAfterProduction = [];
-  updatedCities.forEach((city) => {
-    const result = processProductionQueue(city, updatedTiles);
-    updatedTiles = result.tiles;
-    citiesAfterProduction.push(result.city);
-    if (result.completedSettlement) {
-      completedSettlements.push(result.completedSettlement);
-    }
-  });
-  updatedCities = citiesAfterProduction;
 
   const citiesByOwner = updatedCities.reduce((acc, city) => {
     if (!acc[city.owner]) {
@@ -56,7 +69,9 @@ export const processTurn = ({ players, cities, tiles }) => {
     return acc;
   }, {});
 
-  let updatedPlayers = players.map((player) => {
+  const playersWithAiResearch = players.map(assignDefaultAiResearch);
+
+  const updatedPlayers = playersWithAiResearch.map((player) => {
     const ownedCities = citiesByOwner[player.id] ?? [];
     const sciencePerTurn = ownedCities.reduce(
       (sum, city) => sum + city.yields.science,
@@ -88,32 +103,20 @@ export const processTurn = ({ players, cities, tiles }) => {
   });
 
   updatedCities = processAiTurn({
-    players: updatedPlayers,
+    players: playersWithAiResearch,
     cities: updatedCities,
   });
 
-  updatedPlayers = updatedPlayers.map((player) => {
-    if (player.type !== "ai" || player.currentResearch) {
-      return player;
+  const citiesAfterProduction = [];
+  updatedCities.forEach((city) => {
+    const result = processProductionQueue(city, updatedTiles);
+    updatedTiles = result.tiles;
+    citiesAfterProduction.push(result.city);
+    if (result.completedSettlement) {
+      completedSettlements.push(result.completedSettlement);
     }
-
-    const defaultPick = [
-      "agriculture",
-      "mining",
-      "writing",
-      "bronzeWorking",
-    ].find((techId) => !player.unlockedTechs.includes(techId));
-
-    if (!defaultPick) {
-      return player;
-    }
-
-    return {
-      ...player,
-      currentResearch: defaultPick,
-      scienceProgress: 0,
-    };
   });
+  updatedCities = citiesAfterProduction;
 
   return {
     players: updatedPlayers,

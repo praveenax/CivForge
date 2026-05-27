@@ -205,6 +205,13 @@ export const useGameStore = create((set, get) => {
         };
       }),
 
+    setResearchForPlayer: (playerId, techId) =>
+      set((state) => ({
+        players: state.players.map((player) =>
+          player.id === playerId ? setResearchTarget(player, techId) : player,
+        ),
+      })),
+
     setResearch: (techId) =>
       set((state) => ({
         players: state.players.map((player) =>

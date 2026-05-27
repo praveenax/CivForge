@@ -138,6 +138,9 @@ export const getValidSettlementTiles = (city, tiles = []) => {
   }
 
   const culturallyOwnedTiles = tiles.filter((tile) => tile.cityId === city.id);
+  const otherCityTiles = tiles.filter(
+    (tile) => tile.cityId !== null && tile.cityId !== city.id,
+  );
 
   if (!culturallyOwnedTiles.length) {
     return [];
@@ -148,10 +151,17 @@ export const getValidSettlementTiles = (city, tiles = []) => {
       return false;
     }
 
-    return culturallyOwnedTiles.some((ownedTile) => {
-      const dx = Math.abs(tile.x - ownedTile.x);
-      const dy = Math.abs(tile.y - ownedTile.y);
-      return dx <= 1 && dy <= 1;
-    });
+    return (
+      culturallyOwnedTiles.some((ownedTile) => {
+        const dx = Math.abs(tile.x - ownedTile.x);
+        const dy = Math.abs(tile.y - ownedTile.y);
+        return dx <= 1 && dy <= 1;
+      }) &&
+      !otherCityTiles.some((otherCityTile) => {
+        const dx = Math.abs(tile.x - otherCityTile.x);
+        const dy = Math.abs(tile.y - otherCityTile.y);
+        return Math.sqrt(dx * dx + dy * dy) <= 3;
+      })
+    );
   });
 };
