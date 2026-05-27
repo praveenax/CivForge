@@ -1,12 +1,5 @@
 import { TERRAIN_TYPES } from "../game/data/terrain";
-
-const resourceGlyph = {
-  wheat: "W",
-  iron: "I",
-  stone: "S",
-  gems: "G",
-  manuscripts: "M",
-};
+import ResourceIcon from "./ResourceIcon";
 
 const improvementGlyph = {
   settlement: "SE",
@@ -51,7 +44,9 @@ function Tile({ tile, ownerCivilizationId, isSelected, hasCity, onClick }) {
         {tile.x},{tile.y}
       </span> */}
       {tile.resource ? (
-        <span className="tile-resource">{resourceGlyph[tile.resource]}</span>
+        <span className="tile-resource" title={tile.resource}>
+          <ResourceIcon resource={tile.resource} />
+        </span>
       ) : null}
       {tile.improvement ? (
         <span className="tile-improvement">

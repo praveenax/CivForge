@@ -481,6 +481,24 @@ button:hover {
   font-weight: 800;
 }
 
+.tile-resource {
+  color: #f4f0df;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(18, 29, 34, 0.7);
+  border: 1px solid rgba(239, 232, 209, 0.45);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.tile-resource-icon {
+  width: 11px;
+  height: 11px;
+}
+
 .tile-improvement {
   position: absolute;
   left: 2px;
