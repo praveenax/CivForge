@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import bgMusic from "./assets/bg.mp3";
 import MenuScreen from "./components/MenuScreen";
 import PlayingScreen from "./components/PlayingScreen";
 import SetupScreen from "./components/SetupScreen";
@@ -20,6 +21,8 @@ const DEFAULT_SETUP = {
 };
 
 function App() {
+  const bgAudioRef = useRef(null);
+
   const [screen, setScreen] = useState(GAME_SCREENS.MENU);
   const [setup, setSetup] = useState(DEFAULT_SETUP);
   const [menuError, setMenuError] = useState("");
@@ -38,6 +41,9 @@ function App() {
   const selectedCityId = useGameStore((state) => state.selectedCityId);
   const selectedTileId = useGameStore((state) => state.selectedTileId);
   const isTechTreeOpen = useGameStore((state) => state.isTechTreeOpen);
+  const pendingCityFounding = useGameStore(
+    (state) => state.pendingCityFounding,
+  );
   const gameSetup = useGameStore((state) => state.gameSetup);
 
   const selectCity = useGameStore((state) => state.selectCity);
@@ -47,6 +53,12 @@ function App() {
   const setResearch = useGameStore((state) => state.setResearch);
   const toggleTechTree = useGameStore((state) => state.toggleTechTree);
   const endTurn = useGameStore((state) => state.endTurn);
+  const completeCityFounding = useGameStore(
+    (state) => state.completeCityFounding,
+  );
+  const dismissCityFounding = useGameStore(
+    (state) => state.dismissCityFounding,
+  );
   const startNewGame = useGameStore((state) => state.startNewGame);
   const loadGameSnapshot = useGameStore((state) => state.loadGameSnapshot);
   const exportGameSnapshot = useGameStore((state) => state.exportGameSnapshot);
@@ -68,6 +80,42 @@ function App() {
       return false;
     }
   })();
+
+  useEffect(() => {
+    const audio = new Audio(bgMusic);
+    audio.loop = true;
+    audio.volume = 0.3;
+    bgAudioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+      bgAudioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = bgAudioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    audio.loop = true;
+    audio.volume = 0.3;
+
+    if (screen === GAME_SCREENS.PLAYING) {
+      const maybePromise = audio.play();
+      if (maybePromise?.catch) {
+        maybePromise.catch(() => {
+          // Ignore autoplay restrictions until user interacts.
+        });
+      }
+      return;
+    }
+
+    audio.pause();
+    audio.currentTime = 0;
+  }, [screen]);
 
   useEffect(() => {
     if (!isSimulationRunning || screen !== GAME_SCREENS.PLAYING) {
@@ -129,6 +177,24 @@ function App() {
       window.clearTimeout(timeoutId);
     };
   }, [cities, isSimulationRunning, player, screen]);
+
+  useEffect(() => {
+    if (
+      screen !== GAME_SCREENS.PLAYING ||
+      !pendingCityFounding ||
+      !isSimulationRunning
+    ) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsSimulationRunning(false);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isSimulationRunning, pendingCityFounding, screen]);
 
   useEffect(() => {
     if (!researchProgress.currentTech) {
@@ -206,6 +272,7 @@ function App() {
     setIsSimulationRunning(false);
     setIsNoProductionPromptOpen(false);
     setNoProductionCityId(null);
+    dismissCityFounding();
     setScreen(GAME_SCREENS.SETUP);
   };
 
@@ -216,6 +283,7 @@ function App() {
     setIsResearchPromptOpen(false);
     setIsNoProductionPromptOpen(false);
     setNoProductionCityId(null);
+    dismissCityFounding();
     setIsListOverlayOpen(false);
     setScreen(GAME_SCREENS.PLAYING);
   };
@@ -242,6 +310,7 @@ function App() {
       setIsResearchPromptOpen(false);
       setIsNoProductionPromptOpen(false);
       setNoProductionCityId(null);
+      dismissCityFounding();
       setIsListOverlayOpen(false);
       setScreen(GAME_SCREENS.PLAYING);
     } catch {
@@ -275,6 +344,10 @@ function App() {
     selectCity(noProductionCity.id);
     handleLocateCity(noProductionCity);
     setIsNoProductionPromptOpen(false);
+  };
+
+  const handleConfirmSettlementName = (name) => {
+    completeCityFounding(name);
   };
 
   if (screen === GAME_SCREENS.MENU) {
@@ -329,6 +402,8 @@ function App() {
       noProductionCity={noProductionCity}
       onLocateNoProductionCity={handleLocateNoProductionCity}
       onCloseNoProductionPrompt={() => setIsNoProductionPromptOpen(false)}
+      isSettlementNamingOpen={Boolean(pendingCityFounding)}
+      onConfirmSettlementName={handleConfirmSettlementName}
       isListOverlayOpen={isListOverlayOpen}
       onCloseListOverlay={() => setIsListOverlayOpen(false)}
       onLocateCity={handleLocateCity}
