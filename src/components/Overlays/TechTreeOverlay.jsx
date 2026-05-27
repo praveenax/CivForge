@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -32,51 +33,111 @@ const getNodeStyle = (status) => {
 };
 
 function TechTreeOverlay({ player, onClose, onSelectTech }) {
-  const nodes = Object.values(TECHS).map((tech) => {
-    const status = player.unlockedTechs.includes(tech.id)
-      ? "unlocked"
-      : player.currentResearch === tech.id
-        ? "researching"
-        : "locked";
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-    return {
-      id: tech.id,
-      position: TECH_NODE_POSITIONS[tech.id] ?? { x: 0, y: 0 },
-      sourcePosition: Position.Right,
-      targetPosition: Position.Left,
-      data: {
-        label: (
-          <button
-            type="button"
-            className="tech-node-button"
-            disabled={status === "unlocked"}
-            onClick={() => onSelectTech(tech.id)}
-          >
-            <strong>{tech.name}</strong>
-            <span>Cost: {tech.cost}</span>
-            <span>Status: {status}</span>
-          </button>
-        ),
-      },
-      style: getNodeStyle(status),
-      draggable: false,
-    };
-  });
+  const nodes = useMemo(
+    () =>
+      Object.values(TECHS).map((tech) => {
+        const status = player.unlockedTechs.includes(tech.id)
+          ? "unlocked"
+          : player.currentResearch === tech.id
+            ? "researching"
+            : "locked";
 
-  const edges = Object.values(TECHS).flatMap((tech) =>
-    tech.requires.map((dependency) => ({
-      id: `${dependency}->${tech.id}`,
-      source: dependency,
-      target: tech.id,
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        width: 10,
-        height: 10,
-        color: "#989da2",
-      },
-      style: { stroke: "#989da2", strokeWidth: 2 },
-    })),
+        return {
+          id: tech.id,
+          position: TECH_NODE_POSITIONS[tech.id] ?? { x: 0, y: 0 },
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
+          data: {
+            label: (
+              <button
+                type="button"
+                className="tech-node-button"
+                disabled={status === "unlocked"}
+                onClick={() => onSelectTech(tech.id)}
+              >
+                <strong>{tech.name}</strong>
+                <span>Cost: {tech.cost}</span>
+                <span>Status: {status}</span>
+              </button>
+            ),
+          },
+          style: getNodeStyle(status),
+          draggable: false,
+        };
+      }),
+    [onSelectTech, player.currentResearch, player.unlockedTechs],
   );
+
+  const edges = useMemo(
+    () =>
+      Object.values(TECHS).flatMap((tech) =>
+        tech.requires.map((dependency) => ({
+          id: `${dependency}->${tech.id}`,
+          source: dependency,
+          target: tech.id,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 10,
+            height: 10,
+            color: "#989da2",
+          },
+          style: { stroke: "#989da2", strokeWidth: 2 },
+        })),
+      ),
+    [],
+  );
+
+  useEffect(() => {
+    if (!reactFlowInstance || !nodes.length) {
+      return;
+    }
+
+    const sortedColumns = Array.from(
+      new Set(
+        Object.values(TECH_NODE_POSITIONS)
+          .map((position) => position.x)
+          .sort((left, right) => left - right),
+      ),
+    );
+
+    const fallbackTech =
+      player.currentResearch ||
+      player.unlockedTechs
+        .map((techId) => ({
+          id: techId,
+          x: TECH_NODE_POSITIONS[techId]?.x ?? -1,
+        }))
+        .sort((left, right) => right.x - left.x)[0]?.id ||
+      "agriculture";
+
+    const anchorX = TECH_NODE_POSITIONS[fallbackTech]?.x ?? sortedColumns[0] ?? 0;
+    const anchorColumnIndex = sortedColumns.indexOf(anchorX);
+    const startColumnIndex = Math.max(0, anchorColumnIndex);
+    const targetColumns = sortedColumns.slice(
+      startColumnIndex,
+      startColumnIndex + 3,
+    );
+    const fallbackColumns = sortedColumns.slice(0, 3);
+    const visibleColumns = targetColumns.length ? targetColumns : fallbackColumns;
+
+    const focusNodes = nodes.filter((node) =>
+      visibleColumns.includes(node.position.x),
+    );
+
+    if (!focusNodes.length) {
+      return;
+    }
+
+    reactFlowInstance.fitView({
+      nodes: focusNodes,
+      padding: 0.35,
+      duration: 350,
+      minZoom: 0.8,
+      maxZoom: 1.35,
+    });
+  }, [nodes, player.currentResearch, player.unlockedTechs, reactFlowInstance]);
 
   return (
     <section className="tech-overlay">
@@ -90,8 +151,9 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          fitView
-          fitViewOptions={{ padding: 0.25 }}
+          onInit={setReactFlowInstance}
+          minZoom={0.45}
+          maxZoom={1.6}
         >
           <Background color="#505860" gap={24} />
           <Controls showInteractive={false} />
