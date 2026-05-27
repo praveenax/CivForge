@@ -2,6 +2,7 @@ import CityOverlay from "./CityOverlay";
 import ListOverlay from "./ListOverlay";
 import NoProductionPromptModal from "./NoProductionPromptModal";
 import ResearchPromptModal from "./ResearchPromptModal";
+import SettlementNamingModal from "./SettlementNamingModal";
 import TechTreeOverlay from "./TechTreeOverlay";
 import TileInfoPanel from "./TileInfoPanel";
 import TopBar from "./TopBar";
@@ -35,6 +36,8 @@ function PlayingScreen({
   noProductionCity,
   onLocateNoProductionCity,
   onCloseNoProductionPrompt,
+  isSettlementNamingOpen,
+  onConfirmSettlementName,
   isListOverlayOpen,
   onCloseListOverlay,
   onLocateCity,
@@ -98,6 +101,11 @@ function PlayingScreen({
         city={noProductionCity}
         onLocate={onLocateNoProductionCity}
         onClose={onCloseNoProductionPrompt}
+      />
+
+      <SettlementNamingModal
+        isOpen={isSettlementNamingOpen}
+        onConfirm={onConfirmSettlementName}
       />
 
       <ListOverlay

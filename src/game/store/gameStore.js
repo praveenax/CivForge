@@ -162,6 +162,44 @@ const createCity = ({ id, name, owner, x, y, isPlayerCity }) => ({
   },
 });
 
+const createFoundedCity = ({ id, name, owner, x, y }) => ({
+  id,
+  name,
+  owner,
+  x,
+  y,
+  population: 1,
+  food: 0,
+  foodNeededForNextPop: 5,
+  culture: 0,
+  cultureLevel: 1,
+  cultureNeededForNextLevel: 10,
+  goldStored: 0,
+  scienceStored: 0,
+  buildings: [],
+  queue: [],
+  units: [],
+  yields: {
+    food: 2,
+    production: 1,
+    gold: 1,
+    science: 1,
+    culture: 1,
+  },
+});
+
+const getNextCityId = (cities) => {
+  const maxId = cities.reduce((max, city) => {
+    const numeric = Number(String(city.id).replace(/^city_/, ""));
+    if (!Number.isFinite(numeric)) {
+      return max;
+    }
+    return Math.max(max, numeric);
+  }, 0);
+
+  return `city_${maxId + 1}`;
+};
+
 const buildInitialWorldActors = (setup) => {
   const normalizedSetup = normalizeGameSetup(setup);
   const playerCiv = getCivilizationById(normalizedSetup.civilizationId);
@@ -257,6 +295,7 @@ const buildSaveSnapshot = (state) => ({
   tiles: state.tiles,
   cities: state.cities,
   players: state.players,
+  pendingCityFounding: state.pendingCityFounding,
   gameSetup: normalizeGameSetup(state.gameSetup),
 });
 
@@ -275,6 +314,7 @@ export const useGameStore = create((set, get) => {
     turn: 1,
     selectedCityId: "city_1",
     selectedTileId: null,
+    pendingCityFounding: null,
     isTechTreeOpen: false,
     ...initial,
 
@@ -285,6 +325,7 @@ export const useGameStore = create((set, get) => {
         turn: 1,
         selectedCityId: fresh.cities[0]?.id ?? null,
         selectedTileId: null,
+        pendingCityFounding: null,
         isTechTreeOpen: false,
         ...fresh,
       });
@@ -296,6 +337,7 @@ export const useGameStore = create((set, get) => {
         turn: 1,
         selectedCityId: fresh.cities[0]?.id ?? null,
         selectedTileId: null,
+        pendingCityFounding: null,
         isTechTreeOpen: false,
         ...fresh,
       });
@@ -315,6 +357,7 @@ export const useGameStore = create((set, get) => {
         selectedCityId:
           snapshot.selectedCityId ?? snapshot.cities[0]?.id ?? null,
         selectedTileId: snapshot.selectedTileId ?? null,
+        pendingCityFounding: snapshot.pendingCityFounding ?? null,
         isTechTreeOpen: Boolean(snapshot.isTechTreeOpen),
         tiles: snapshot.tiles,
         cities: snapshot.cities,
@@ -456,11 +499,69 @@ export const useGameStore = create((set, get) => {
           tiles: state.tiles,
         });
 
+        const completedSettlements = next.completedSettlements ?? [];
+        const pendingCityFounding =
+          state.pendingCityFounding ?? completedSettlements[0] ?? null;
+
+        const nextState = { ...next };
+        delete nextState.completedSettlements;
+
         return {
-          ...next,
+          ...nextState,
+          pendingCityFounding,
           turn: state.turn + 1,
         };
       }),
+
+    completeCityFounding: (name) =>
+      set((state) => {
+        const pending = state.pendingCityFounding;
+        if (!pending) {
+          return state;
+        }
+
+        const targetTile = state.tiles.find(
+          (tile) => tile.id === pending.tileId,
+        );
+        if (!targetTile) {
+          return {
+            pendingCityFounding: null,
+          };
+        }
+
+        const cityName = String(name ?? "").trim() || "New Settlement";
+        const cityId = getNextCityId(state.cities);
+        const foundedCity = createFoundedCity({
+          id: cityId,
+          name: cityName,
+          owner: pending.ownerId,
+          x: targetTile.x,
+          y: targetTile.y,
+        });
+
+        const updatedTiles = state.tiles.map((tile) => {
+          if (tile.id !== targetTile.id) {
+            return tile;
+          }
+
+          return {
+            ...tile,
+            owner: pending.ownerId,
+            cityId,
+            improvement: null,
+          };
+        });
+
+        return {
+          cities: [...state.cities, foundedCity],
+          tiles: updatedTiles,
+          selectedCityId: cityId,
+          selectedTileId: targetTile.id,
+          pendingCityFounding: null,
+        };
+      }),
+
+    dismissCityFounding: () => set({ pendingCityFounding: null }),
 
     getPlayer: () =>
       get().players.find((player) => player.id === PLAYER_ID) ?? null,

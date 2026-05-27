@@ -12,6 +12,7 @@ import { processScience } from "./scienceSystem";
 
 export const processTurn = ({ players, cities, tiles }) => {
   let updatedTiles = [...tiles];
+  const completedSettlements = [];
 
   let updatedCities = cities.map((city) => {
     updatedTiles = claimTilesAroundCity(updatedTiles, city, 1);
@@ -40,6 +41,9 @@ export const processTurn = ({ players, cities, tiles }) => {
     const result = processProductionQueue(city, updatedTiles);
     updatedTiles = result.tiles;
     citiesAfterProduction.push(result.city);
+    if (result.completedSettlement) {
+      completedSettlements.push(result.completedSettlement);
+    }
   });
   updatedCities = citiesAfterProduction;
 
@@ -115,5 +119,6 @@ export const processTurn = ({ players, cities, tiles }) => {
     players: updatedPlayers,
     cities: updatedCities,
     tiles: updatedTiles,
+    completedSettlements,
   };
 };

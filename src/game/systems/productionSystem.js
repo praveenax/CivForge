@@ -23,6 +23,7 @@ export const processProductionQueue = (city, tiles) => {
     return {
       city,
       tiles,
+      completedSettlement: null,
     };
   }
 
@@ -37,6 +38,7 @@ export const processProductionQueue = (city, tiles) => {
         queue: [{ ...current, progress: nextProgress }, ...rest],
       },
       tiles,
+      completedSettlement: null,
     };
   }
 
@@ -50,6 +52,7 @@ export const processProductionQueue = (city, tiles) => {
         queue: rest,
       },
       tiles,
+      completedSettlement: null,
     };
   }
 
@@ -61,6 +64,7 @@ export const processProductionQueue = (city, tiles) => {
         queue: rest,
       },
       tiles,
+      completedSettlement: null,
     };
   }
 
@@ -75,6 +79,7 @@ export const processProductionQueue = (city, tiles) => {
           queue: rest,
         },
         tiles,
+        completedSettlement: null,
       };
     }
 
@@ -86,6 +91,7 @@ export const processProductionQueue = (city, tiles) => {
           queue: rest,
         },
         tiles,
+        completedSettlement: null,
       };
     }
 
@@ -100,6 +106,7 @@ export const processProductionQueue = (city, tiles) => {
             queue: rest,
           },
           tiles,
+          completedSettlement: null,
         };
       }
     }
@@ -123,6 +130,13 @@ export const processProductionQueue = (city, tiles) => {
         queue: rest,
       },
       tiles: updatedTiles,
+      completedSettlement: isSettlement
+        ? {
+            tileId,
+            ownerId: city.owner,
+            sourceCityId: city.id,
+          }
+        : null,
     };
   }
 
@@ -132,5 +146,6 @@ export const processProductionQueue = (city, tiles) => {
       queue: rest,
     },
     tiles,
+    completedSettlement: null,
   };
 };
