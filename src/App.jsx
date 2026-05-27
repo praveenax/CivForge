@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import bgMusic from "./assets/bg.mp3";
 import MenuScreen from "./components/MenuScreen";
 import PlayingScreen from "./components/PlayingScreen";
@@ -8,31 +9,41 @@ import {
   GAME_SAVE_KEY,
   useGameStore,
 } from "./game/store/gameStore";
-
-const GAME_SCREENS = {
-  MENU: "menu",
-  SETUP: "setup",
-  PLAYING: "playing",
-};
-
-const DEFAULT_SETUP = {
-  civilizationId: CIVILIZATION_OPTIONS[0]?.id ?? "rome",
-  opponentCount: 2,
-};
+import {
+  GAME_SCREENS,
+  setListOverlayOpen,
+  setLocateRequest,
+  setMenuError,
+  setNoProductionCityId,
+  setNoProductionPromptOpen,
+  setResearchPromptOpen,
+  setScreen,
+  setSetup,
+  setSimulationRunning,
+  toggleSimulationRunning,
+} from "./store/uiSlice";
 
 function App() {
   const bgAudioRef = useRef(null);
+  const dispatch = useDispatch();
 
-  const [screen, setScreen] = useState(GAME_SCREENS.MENU);
-  const [setup, setSetup] = useState(DEFAULT_SETUP);
-  const [menuError, setMenuError] = useState("");
-  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
-  const [isResearchPromptOpen, setIsResearchPromptOpen] = useState(false);
-  const [isNoProductionPromptOpen, setIsNoProductionPromptOpen] =
-    useState(false);
-  const [noProductionCityId, setNoProductionCityId] = useState(null);
-  const [isListOverlayOpen, setIsListOverlayOpen] = useState(false);
-  const [locateRequest, setLocateRequest] = useState(null);
+  const screen = useSelector((state) => state.ui.screen);
+  const setup = useSelector((state) => state.ui.setup);
+  const menuError = useSelector((state) => state.ui.menuError);
+  const isSimulationRunning = useSelector(
+    (state) => state.ui.isSimulationRunning,
+  );
+  const isResearchPromptOpen = useSelector(
+    (state) => state.ui.isResearchPromptOpen,
+  );
+  const isNoProductionPromptOpen = useSelector(
+    (state) => state.ui.isNoProductionPromptOpen,
+  );
+  const noProductionCityId = useSelector(
+    (state) => state.ui.noProductionCityId,
+  );
+  const isListOverlayOpen = useSelector((state) => state.ui.isListOverlayOpen);
+  const locateRequest = useSelector((state) => state.ui.locateRequest);
 
   const turn = useGameStore((state) => state.turn);
   const tiles = useGameStore((state) => state.tiles);
@@ -101,7 +112,7 @@ function App() {
     }
 
     audio.loop = true;
-    audio.volume = 0.3;
+    audio.volume = 0;
 
     if (screen === GAME_SCREENS.PLAYING) {
       const maybePromise = audio.play();
@@ -141,14 +152,14 @@ function App() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      setIsSimulationRunning(false);
-      setIsResearchPromptOpen(true);
+      dispatch(setSimulationRunning(false));
+      dispatch(setResearchPromptOpen(true));
     }, 0);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isSimulationRunning, researchProgress.currentTech, screen]);
+  }, [dispatch, isSimulationRunning, researchProgress.currentTech, screen]);
 
   useEffect(() => {
     if (screen !== GAME_SCREENS.PLAYING || !isSimulationRunning || !player) {
@@ -168,15 +179,15 @@ function App() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      setIsSimulationRunning(false);
-      setNoProductionCityId(blockedCity.id);
-      setIsNoProductionPromptOpen(true);
+      dispatch(setSimulationRunning(false));
+      dispatch(setNoProductionCityId(blockedCity.id));
+      dispatch(setNoProductionPromptOpen(true));
     }, 0);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [cities, isSimulationRunning, player, screen]);
+  }, [cities, dispatch, isSimulationRunning, player, screen]);
 
   useEffect(() => {
     if (
@@ -188,13 +199,13 @@ function App() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      setIsSimulationRunning(false);
+      dispatch(setSimulationRunning(false));
     }, 0);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isSimulationRunning, pendingCityFounding, screen]);
+  }, [dispatch, isSimulationRunning, pendingCityFounding, screen]);
 
   useEffect(() => {
     if (!researchProgress.currentTech) {
@@ -202,13 +213,13 @@ function App() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      setIsResearchPromptOpen(false);
+      dispatch(setResearchPromptOpen(false));
     }, 0);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [researchProgress.currentTech]);
+  }, [dispatch, researchProgress.currentTech]);
 
   useEffect(() => {
     if (screen !== GAME_SCREENS.PLAYING) {
@@ -268,33 +279,33 @@ function App() {
   ]);
 
   const handleNewGame = () => {
-    setMenuError("");
-    setIsSimulationRunning(false);
-    setIsNoProductionPromptOpen(false);
-    setNoProductionCityId(null);
+    dispatch(setMenuError(""));
+    dispatch(setSimulationRunning(false));
+    dispatch(setNoProductionPromptOpen(false));
+    dispatch(setNoProductionCityId(null));
     dismissCityFounding();
-    setScreen(GAME_SCREENS.SETUP);
+    dispatch(setScreen(GAME_SCREENS.SETUP));
   };
 
   const handleStartGame = () => {
     startNewGame(setup);
-    setMenuError("");
-    setIsSimulationRunning(false);
-    setIsResearchPromptOpen(false);
-    setIsNoProductionPromptOpen(false);
-    setNoProductionCityId(null);
+    dispatch(setMenuError(""));
+    dispatch(setSimulationRunning(false));
+    dispatch(setResearchPromptOpen(false));
+    dispatch(setNoProductionPromptOpen(false));
+    dispatch(setNoProductionCityId(null));
     dismissCityFounding();
-    setIsListOverlayOpen(false);
-    setScreen(GAME_SCREENS.PLAYING);
+    dispatch(setListOverlayOpen(false));
+    dispatch(setScreen(GAME_SCREENS.PLAYING));
   };
 
   const handleLoadGame = () => {
-    setMenuError("");
+    dispatch(setMenuError(""));
 
     try {
       const raw = localStorage.getItem(GAME_SAVE_KEY);
       if (!raw) {
-        setMenuError("No saved game found. Start a new game first.");
+        dispatch(setMenuError("No saved game found. Start a new game first."));
         return;
       }
 
@@ -302,19 +313,23 @@ function App() {
       const didLoad = loadGameSnapshot(parsed);
 
       if (!didLoad) {
-        setMenuError("Saved game data is invalid. Please start a new game.");
+        dispatch(
+          setMenuError("Saved game data is invalid. Please start a new game."),
+        );
         return;
       }
 
-      setIsSimulationRunning(false);
-      setIsResearchPromptOpen(false);
-      setIsNoProductionPromptOpen(false);
-      setNoProductionCityId(null);
+      dispatch(setSimulationRunning(false));
+      dispatch(setResearchPromptOpen(false));
+      dispatch(setNoProductionPromptOpen(false));
+      dispatch(setNoProductionCityId(null));
       dismissCityFounding();
-      setIsListOverlayOpen(false);
-      setScreen(GAME_SCREENS.PLAYING);
+      dispatch(setListOverlayOpen(false));
+      dispatch(setScreen(GAME_SCREENS.PLAYING));
     } catch {
-      setMenuError("Unable to load save data. Please start a new game.");
+      dispatch(
+        setMenuError("Unable to load save data. Please start a new game."),
+      );
     }
   };
 
@@ -327,13 +342,15 @@ function App() {
       selectTile(tile.id);
     }
 
-    setLocateRequest({
-      x: city.x,
-      y: city.y,
-      cityId: city.id,
-      requestId: Date.now(),
-    });
-    setIsListOverlayOpen(false);
+    dispatch(
+      setLocateRequest({
+        x: city.x,
+        y: city.y,
+        cityId: city.id,
+        requestId: Date.now(),
+      }),
+    );
+    dispatch(setListOverlayOpen(false));
   };
 
   const handleLocateNoProductionCity = () => {
@@ -343,7 +360,15 @@ function App() {
 
     selectCity(noProductionCity.id);
     handleLocateCity(noProductionCity);
-    setIsNoProductionPromptOpen(false);
+    dispatch(setNoProductionPromptOpen(false));
+  };
+
+  const handleSetupChange = (nextSetupOrUpdater) => {
+    const nextSetup =
+      typeof nextSetupOrUpdater === "function"
+        ? nextSetupOrUpdater(setup)
+        : nextSetupOrUpdater;
+    dispatch(setSetup(nextSetup));
   };
 
   const handleConfirmSettlementName = (name) => {
@@ -366,8 +391,8 @@ function App() {
       <SetupScreen
         setup={setup}
         civilizationOptions={CIVILIZATION_OPTIONS}
-        onSetupChange={setSetup}
-        onBack={() => setScreen(GAME_SCREENS.MENU)}
+        onSetupChange={handleSetupChange}
+        onBack={() => dispatch(setScreen(GAME_SCREENS.MENU))}
         onStartGame={handleStartGame}
       />
     );
@@ -379,9 +404,9 @@ function App() {
       player={player}
       researchProgress={researchProgress}
       onToggleTechTree={toggleTechTree}
-      onOpenList={() => setIsListOverlayOpen(true)}
+      onOpenList={() => dispatch(setListOverlayOpen(true))}
       isSimulationRunning={isSimulationRunning}
-      onToggleSimulation={() => setIsSimulationRunning((previous) => !previous)}
+      onToggleSimulation={() => dispatch(toggleSimulationRunning())}
       onEndTurn={endTurn}
       tiles={tiles}
       cities={cities}
@@ -397,15 +422,17 @@ function App() {
       isTechTreeOpen={isTechTreeOpen}
       onSetResearch={setResearch}
       isResearchPromptOpen={isResearchPromptOpen}
-      onCloseResearchPrompt={() => setIsResearchPromptOpen(false)}
+      onCloseResearchPrompt={() => dispatch(setResearchPromptOpen(false))}
       isNoProductionPromptOpen={isNoProductionPromptOpen}
       noProductionCity={noProductionCity}
       onLocateNoProductionCity={handleLocateNoProductionCity}
-      onCloseNoProductionPrompt={() => setIsNoProductionPromptOpen(false)}
+      onCloseNoProductionPrompt={() =>
+        dispatch(setNoProductionPromptOpen(false))
+      }
       isSettlementNamingOpen={Boolean(pendingCityFounding)}
       onConfirmSettlementName={handleConfirmSettlementName}
       isListOverlayOpen={isListOverlayOpen}
-      onCloseListOverlay={() => setIsListOverlayOpen(false)}
+      onCloseListOverlay={() => dispatch(setListOverlayOpen(false))}
       onLocateCity={handleLocateCity}
     />
   );
