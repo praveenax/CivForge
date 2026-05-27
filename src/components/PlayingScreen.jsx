@@ -77,6 +77,7 @@ function PlayingScreen({
           city={selectedCity}
           player={player}
           tiles={tiles}
+          cities={cities}
           onClose={onCloseCityOverlay}
           onQueueProduction={onQueueProduction}
         />

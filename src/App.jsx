@@ -85,7 +85,9 @@ function App() {
   const selectedCity =
     cities.find((city) => city.id === selectedCityId) ?? null;
   const validSettlementTileIds = selectedCity
-    ? getValidSettlementTiles(selectedCity, tiles).map((tile) => tile.id)
+    ? getValidSettlementTiles(selectedCity, tiles, cities).map(
+        (tile) => tile.id,
+      )
     : [];
   const noProductionCity =
     cities.find((city) => city.id === noProductionCityId) ?? null;

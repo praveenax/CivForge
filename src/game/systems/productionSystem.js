@@ -18,7 +18,7 @@ const getCost = (item) => {
   return Number.MAX_SAFE_INTEGER;
 };
 
-export const processProductionQueue = (city, tiles) => {
+export const processProductionQueue = (city, tiles, cities = []) => {
   if (city.queue.length === 0) {
     return {
       city,
@@ -97,7 +97,7 @@ export const processProductionQueue = (city, tiles) => {
 
     if (isSettlement) {
       const validSettlementTileIds = new Set(
-        getValidSettlementTiles(city, tiles).map((entry) => entry.id),
+        getValidSettlementTiles(city, tiles, cities).map((entry) => entry.id),
       );
       if (!validSettlementTileIds.has(targetTile.id)) {
         return {

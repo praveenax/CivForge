@@ -105,11 +105,12 @@ export const processTurn = ({ players, cities, tiles }) => {
   updatedCities = processAiTurn({
     players: playersWithAiResearch,
     cities: updatedCities,
+    tiles: updatedTiles,
   });
 
   const citiesAfterProduction = [];
   updatedCities.forEach((city) => {
-    const result = processProductionQueue(city, updatedTiles);
+    const result = processProductionQueue(city, updatedTiles, updatedCities);
     updatedTiles = result.tiles;
     citiesAfterProduction.push(result.city);
     if (result.completedSettlement) {

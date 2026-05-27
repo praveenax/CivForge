@@ -21,7 +21,7 @@ import SettlementTilePicker from "../cityOverlay/SettlementTilePicker";
 
 const getEntryLabel = (registry, id) => registry[id]?.name ?? id;
 
-function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
+function CityOverlay({ city, player, tiles, cities, onClose, onQueueProduction }) {
   const [isSettlementPickerOpen, setIsSettlementPickerOpen] = useState(false);
 
   if (!city) {
@@ -98,7 +98,7 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
     ? !settlementImprovement.requiredTech ||
       player?.unlockedTechs.includes(settlementImprovement.requiredTech)
     : false;
-  const validSettlementTiles = getValidSettlementTiles(city, tiles);
+  const validSettlementTiles = getValidSettlementTiles(city, tiles, cities);
 
   const foodConsumed = getFoodConsumedPerTurn(city);
   const netFood = city.yields.food - foodConsumed;

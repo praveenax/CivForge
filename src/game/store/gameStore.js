@@ -138,7 +138,7 @@ export const useGameStore = create((set, get) => {
 
           if (id === "settlement") {
             const validSettlementTileIds = new Set(
-              getValidSettlementTiles(city, state.tiles).map(
+              getValidSettlementTiles(city, state.tiles, state.cities).map(
                 (entry) => entry.id,
               ),
             );
@@ -228,14 +228,67 @@ export const useGameStore = create((set, get) => {
         });
 
         const completedSettlements = next.completedSettlements ?? [];
+        let updatedCities = next.cities;
+        let updatedTiles = next.tiles;
+
+        const playerSettlements = completedSettlements.filter(
+          (entry) => entry.ownerId === PLAYER_ID,
+        );
+        const aiSettlements = completedSettlements.filter(
+          (entry) => entry.ownerId !== PLAYER_ID,
+        );
+
+        aiSettlements.forEach((settlement) => {
+          const targetTile = updatedTiles.find(
+            (tile) => tile.id === settlement.tileId,
+          );
+
+          if (!targetTile) {
+            return;
+          }
+
+          const owner = next.players.find(
+            (player) => player.id === settlement.ownerId,
+          );
+          const ownerCityCount = updatedCities.filter(
+            (city) => city.owner === settlement.ownerId,
+          ).length;
+          const cityName = `${owner?.name ?? "AI"} Outpost ${ownerCityCount + 1}`;
+          const cityId = getNextCityId(updatedCities);
+
+          const foundedCity = createFoundedCity({
+            id: cityId,
+            name: cityName,
+            owner: settlement.ownerId,
+            x: targetTile.x,
+            y: targetTile.y,
+          });
+
+          updatedCities = [...updatedCities, foundedCity];
+          updatedTiles = updatedTiles.map((tile) => {
+            if (tile.id !== targetTile.id) {
+              return tile;
+            }
+
+            return {
+              ...tile,
+              owner: settlement.ownerId,
+              cityId,
+              improvement: null,
+            };
+          });
+        });
+
         const pendingCityFounding =
-          state.pendingCityFounding ?? completedSettlements[0] ?? null;
+          state.pendingCityFounding ?? playerSettlements[0] ?? null;
 
         const nextState = { ...next };
         delete nextState.completedSettlements;
 
         return {
           ...nextState,
+          cities: updatedCities,
+          tiles: updatedTiles,
           pendingCityFounding,
           turn: state.turn + 1,
         };

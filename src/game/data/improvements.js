@@ -132,15 +132,13 @@ export const getImprovementIdForResource = (resourceId, unlockedTechs) => {
   return unlockedMatches[unlockedMatches.length - 1]?.id ?? null;
 };
 
-export const getValidSettlementTiles = (city, tiles = []) => {
+export const getValidSettlementTiles = (city, tiles = [], cities = []) => {
   if (!city) {
     return [];
   }
 
   const culturallyOwnedTiles = tiles.filter((tile) => tile.cityId === city.id);
-  const otherCityTiles = tiles.filter(
-    (tile) => tile.cityId !== null && tile.cityId !== city.id,
-  );
+  const otherCities = (cities ?? []).filter((entry) => entry.id !== city.id);
 
   if (!culturallyOwnedTiles.length) {
     return [];
@@ -157,9 +155,9 @@ export const getValidSettlementTiles = (city, tiles = []) => {
         const dy = Math.abs(tile.y - ownedTile.y);
         return dx <= 1 && dy <= 1;
       }) &&
-      !otherCityTiles.some((otherCityTile) => {
-        const dx = Math.abs(tile.x - otherCityTile.x);
-        const dy = Math.abs(tile.y - otherCityTile.y);
+      !otherCities.some((otherCity) => {
+        const dx = Math.abs(tile.x - otherCity.x);
+        const dy = Math.abs(tile.y - otherCity.y);
         return Math.sqrt(dx * dx + dy * dy) <= 3;
       })
     );
