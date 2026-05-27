@@ -112,7 +112,8 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
         .sort((left, right) => right.x - left.x)[0]?.id ||
       "agriculture";
 
-    const anchorX = TECH_NODE_POSITIONS[fallbackTech]?.x ?? sortedColumns[0] ?? 0;
+    const anchorX =
+      TECH_NODE_POSITIONS[fallbackTech]?.x ?? sortedColumns[0] ?? 0;
     const anchorColumnIndex = sortedColumns.indexOf(anchorX);
     const startColumnIndex = Math.max(0, anchorColumnIndex);
     const targetColumns = sortedColumns.slice(
@@ -120,7 +121,9 @@ function TechTreeOverlay({ player, onClose, onSelectTech }) {
       startColumnIndex + 3,
     );
     const fallbackColumns = sortedColumns.slice(0, 3);
-    const visibleColumns = targetColumns.length ? targetColumns : fallbackColumns;
+    const visibleColumns = targetColumns.length
+      ? targetColumns
+      : fallbackColumns;
 
     const focusNodes = nodes.filter((node) =>
       visibleColumns.includes(node.position.x),
