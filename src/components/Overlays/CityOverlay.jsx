@@ -1,23 +1,23 @@
 import { useState } from "react";
-import { BUILDINGS } from "../game/data/buildings";
+import { BUILDINGS } from "../../game/data/buildings";
 import {
   getImprovementIdForResource,
   getValidSettlementTiles,
   IMPROVEMENTS,
-} from "../game/data/improvements";
-import { RESOURCE_TYPES } from "../game/data/resources";
-import { UNITS } from "../game/data/units";
+} from "../../game/data/improvements";
+import { RESOURCE_TYPES } from "../../game/data/resources";
+import { UNITS } from "../../game/data/units";
 import {
   getCultureNeededForNextLevel,
   getFoodConsumedPerTurn,
   getFoodNeededForNextPopulation,
-} from "../game/systems/citySystem";
-import CityDetailsPanel from "./cityOverlay/CityDetailsPanel";
-import CityOverviewKpis from "./cityOverlay/CityOverviewKpis";
-import CityProductionActions from "./cityOverlay/CityProductionActions";
-import CityProductionQueue from "./cityOverlay/CityProductionQueue";
-import CityYieldsPanel from "./cityOverlay/CityYieldsPanel";
-import SettlementTilePicker from "./cityOverlay/SettlementTilePicker";
+} from "../../game/systems/citySystem";
+import CityDetailsPanel from "../cityOverlay/CityDetailsPanel";
+import CityOverviewKpis from "../cityOverlay/CityOverviewKpis";
+import CityProductionActions from "../cityOverlay/CityProductionActions";
+import CityProductionQueue from "../cityOverlay/CityProductionQueue";
+import CityYieldsPanel from "../cityOverlay/CityYieldsPanel";
+import SettlementTilePicker from "../cityOverlay/SettlementTilePicker";
 
 const getEntryLabel = (registry, id) => registry[id]?.name ?? id;
 

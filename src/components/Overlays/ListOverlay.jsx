@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { TECHS } from "../game/data/techs";
+import { TECHS } from "../../game/data/techs";
 
 const LIST_TABS = {
   CITIES: "cities",

@@ -5,7 +5,7 @@ import ReactFlow, {
   Position,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { TECHS, TECH_NODE_POSITIONS } from "../game/data/techs";
+import { TECHS, TECH_NODE_POSITIONS } from "../../game/data/techs";
 
 const getNodeStyle = (status) => {
   if (status === "unlocked") {
