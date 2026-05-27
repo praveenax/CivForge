@@ -152,6 +152,7 @@ export const useGameStore = create((set, get) => {
 
             const expectedImprovementId = getImprovementIdForResource(
               tile.resource,
+              player.unlockedTechs,
             );
             if (expectedImprovementId !== id) {
               return state;

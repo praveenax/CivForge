@@ -44,18 +44,92 @@ export const IMPROVEMENTS = {
     requiredTech: "writing",
     resources: ["manuscripts"],
   },
+  stockExchangeHub: {
+    id: "stockExchangeHub",
+    name: "Stock Exchange Hub",
+    cost: 120,
+    effects: {
+      gold: 4,
+      production: 1,
+    },
+    requiredTech: "banking",
+    resources: ["gems"],
+  },
+  steamMill: {
+    id: "steamMill",
+    name: "Steam Mill",
+    cost: 130,
+    effects: {
+      production: 4,
+      gold: 1,
+    },
+    requiredTech: "steamPower",
+    resources: ["iron"],
+  },
+  industrialQuarry: {
+    id: "industrialQuarry",
+    name: "Industrial Quarry",
+    cost: 125,
+    effects: {
+      production: 3,
+      gold: 2,
+    },
+    requiredTech: "industrialization",
+    resources: ["stone"],
+  },
+  mechanizedFarm: {
+    id: "mechanizedFarm",
+    name: "Mechanized Farm",
+    cost: 115,
+    effects: {
+      food: 4,
+      production: 1,
+    },
+    requiredTech: "industrialization",
+    resources: ["wheat"],
+  },
+  digitalArchive: {
+    id: "digitalArchive",
+    name: "Digital Archive",
+    cost: 160,
+    effects: {
+      science: 4,
+      culture: 2,
+      gold: 1,
+    },
+    requiredTech: "computers",
+    resources: ["manuscripts"],
+  },
 };
 
-export const getImprovementIdForResource = (resourceId) => {
+export const getImprovementIdForResource = (resourceId, unlockedTechs) => {
   if (!resourceId) {
     return null;
   }
 
-  const matched = Object.values(IMPROVEMENTS).find((improvement) =>
+  const matches = Object.values(IMPROVEMENTS).filter((improvement) =>
     improvement.resources.includes(resourceId),
   );
 
-  return matched?.id ?? null;
+  if (!matches.length) {
+    return null;
+  }
+
+  if (!Array.isArray(unlockedTechs)) {
+    return matches[0]?.id ?? null;
+  }
+
+  const unlockedSet = new Set(unlockedTechs);
+  const unlockedMatches = matches.filter(
+    (improvement) =>
+      !improvement.requiredTech || unlockedSet.has(improvement.requiredTech),
+  );
+
+  if (!unlockedMatches.length) {
+    return null;
+  }
+
+  return unlockedMatches[unlockedMatches.length - 1]?.id ?? null;
 };
 
 export const getValidSettlementTiles = (city, tiles = []) => {

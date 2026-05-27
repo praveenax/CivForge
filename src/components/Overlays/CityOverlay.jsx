@@ -56,7 +56,10 @@ function CityOverlay({ city, player, tiles, onClose, onQueueProduction }) {
   const availableImprovements = cityTiles
     .filter((tile) => tile.resource && !tile.improvement)
     .map((tile) => {
-      const improvementId = getImprovementIdForResource(tile.resource);
+      const improvementId = getImprovementIdForResource(
+        tile.resource,
+        player?.unlockedTechs,
+      );
       if (!improvementId) {
         return null;
       }

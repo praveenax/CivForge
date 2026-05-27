@@ -149,17 +149,7 @@ export const BUILDINGS = {
     },
     requiredTech: "education",
   },
-  greatLibrary: {
-    id: "greatLibrary",
-    name: "Great Library",
-    cost: 280,
-    effects: {
-      science: 10,
-      culture: 4,
-    },
-    requiredTech: "education",
-    isWonder: true,
-  },
+
   merchantGuild: {
     id: "merchantGuild",
     name: "Merchant Guild",
@@ -189,5 +179,95 @@ export const BUILDINGS = {
       siegeProduction: 30,
     },
     requiredTech: "engineering",
+  },
+
+  // === INDUSTRIAL ERA ===
+  factory: {
+    id: "factory",
+    name: "Factory",
+    cost: 320,
+    effects: { production: 8, pollution: 2 },
+    requiredTech: "steamPower",
+  },
+  coalMine: {
+    id: "coalMine",
+    name: "Coal Mine",
+    cost: 180,
+    effects: { production: 6 },
+    requiredTech: "industrialization",
+  },
+  assemblyPlant: {
+    id: "assemblyPlant",
+    name: "Assembly Plant",
+    cost: 340,
+    effects: { production: 10 },
+    requiredTech: "industrialization",
+  },
+  powerPlant: {
+    id: "powerPlant",
+    name: "Power Plant",
+    cost: 350,
+    effects: { productionBonus: 25, energy: 10 },
+    requiredTech: "electricity",
+  },
+
+  // === MODERN ERA ===
+  broadcastTower: {
+    id: "broadcastTower",
+    name: "Broadcast Tower",
+    cost: 280,
+    effects: { culture: 8, happiness: 2 },
+    requiredTech: "radio",
+  },
+  airport: {
+    id: "airport",
+    name: "Airport",
+    cost: 420,
+    effects: { airTrade: 40, unitSpeed: 20 },
+    requiredTech: "flight",
+  },
+  oilWell: {
+    id: "oilWell",
+    name: "Oil Well",
+    cost: 250,
+    effects: { production: 5, oilBonus: 30 },
+    requiredTech: "combustion",
+  },
+  nuclearPlant: {
+    id: "nuclearPlant",
+    name: "Nuclear Plant",
+    cost: 480,
+    effects: { productionBonus: 40, energy: 15 },
+    requiredTech: "atomicTheory",
+  },
+
+  // === INFORMATION / FUTURE ERA ===
+  researchLab: {
+    id: "researchLab",
+    name: "Research Lab",
+    cost: 520,
+    effects: { science: 12 },
+    requiredTech: "computers",
+  },
+  computerCenter: {
+    id: "computerCenter",
+    name: "Computer Center",
+    cost: 550,
+    effects: { science: 15, production: 6 },
+    requiredTech: "computers",
+  },
+  automationFactory: {
+    id: "automationFactory",
+    name: "Automation Factory",
+    cost: 580,
+    effects: { production: 14, robotBonus: 30 },
+    requiredTech: "robotics",
+  },
+  fusionPlant: {
+    id: "fusionPlant",
+    name: "Fusion Plant",
+    cost: 650,
+    effects: { productionBonus: 50, energy: 25, pollution: -3 },
+    requiredTech: "nuclearFusion",
   },
 };

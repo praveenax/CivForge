@@ -6,6 +6,11 @@ const improvementGlyph = {
   mine: "MI",
   farm: "FA",
   archive: "AR",
+  stockExchangeHub: "SX",
+  steamMill: "SM",
+  industrialQuarry: "IQ",
+  mechanizedFarm: "MF",
+  digitalArchive: "DA",
 };
 
 const CIV_CLASS_BY_ID = {

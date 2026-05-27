@@ -314,4 +314,28 @@ export const TECH_NODE_POSITIONS = {
   education: { x: 1120, y: 120 },
   guilds: { x: 1120, y: 290 },
   chivalry: { x: 1120, y: 460 },
+
+  // Tier 6
+  printingPress: { x: 1400, y: 90 },
+  banking: { x: 1400, y: 230 },
+  astronomy: { x: 1400, y: 370 },
+  gunpowder: { x: 1400, y: 510 },
+
+  // Tier 7
+  steamPower: { x: 1680, y: 90 },
+  industrialization: { x: 1680, y: 230 },
+  electricity: { x: 1680, y: 370 },
+  rifling: { x: 1680, y: 510 },
+
+  // Tier 8
+  combustion: { x: 1960, y: 90 },
+  flight: { x: 1960, y: 230 },
+  radio: { x: 1960, y: 370 },
+  atomicTheory: { x: 1960, y: 510 },
+
+  // Tier 9
+  computers: { x: 2240, y: 90 },
+  globalization: { x: 2240, y: 230 },
+  robotics: { x: 2240, y: 370 },
+  nuclearFusion: { x: 2240, y: 510 },
 };
