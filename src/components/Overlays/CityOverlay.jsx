@@ -21,7 +21,14 @@ import SettlementTilePicker from "../cityOverlay/SettlementTilePicker";
 
 const getEntryLabel = (registry, id) => registry[id]?.name ?? id;
 
-function CityOverlay({ city, player, tiles, cities, onClose, onQueueProduction }) {
+function CityOverlay({
+  city,
+  player,
+  tiles,
+  cities,
+  onClose,
+  onQueueProduction,
+}) {
   const [isSettlementPickerOpen, setIsSettlementPickerOpen] = useState(false);
 
   if (!city) {
