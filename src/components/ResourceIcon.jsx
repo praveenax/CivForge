@@ -1,8 +1,13 @@
 const resourceGlyph = {
   wheat: "W",
+  rice: "R",
+  deer: "D",
   iron: "I",
   stone: "S",
+  marble: "Mb",
   gems: "G",
+  salt: "Sa",
+  silk: "Si",
   manuscripts: "M",
 };
 
