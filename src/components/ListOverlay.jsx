@@ -196,7 +196,11 @@ function ListOverlay({
                     <div>
                       <strong>{city.name}</strong> - Owner:{" "}
                       {playerNameById.get(city.owner) ?? city.owner} - Pop:{" "}
-                      {city.population}
+                      {city.population}- Production:{" "}
+                      {city.yields?.production ?? 0} - Science:{" "}
+                      {city.yields?.science ?? 0} - Culture:{" "}
+                      {city.yields?.culture ?? 0} - Gold:{" "}
+                      {city.yields?.gold ?? 0}
                     </div>
                     <div>
                       Building:{" "}
